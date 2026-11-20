@@ -1,0 +1,2022 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quadratics Unit Progress Checker</title>
+<meta name="description" content="Practice for the Grade 10 quadratics unit: equations, graphs, classifying relations, finding a, height problems and reasoning.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231d2433'/%3E%3Cpath d='M6 6 Q16 44 26 6' fill='none' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+/* base rules the page expects from its host */
+:root { color-scheme: light; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+body { margin: 0; }
+[hidden] { display: none !important; }
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap">
+<style>
+/* Layout: the thing to read (graph or table of values) on the left, the questions on the right.
+   On a phone it stacks to one column with a number pad docked at the bottom. */
+:root {
+  --bg: #fbfbf8; --panel: #ffffff; --ink: #1d2433; --muted: #6b7280;
+  --grid: #e7e8ec; --axis: #1d2433; --line: #e2e4ea; --curve: #1d2433;
+  --c1: #2257d6; --c2: #d0342c; --c3: #138a52; --c4: #7a3fc4; --hl: #c77700;
+  --font: "Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --rh: 54px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14171f; --panel: #1b1f29; --ink: #eef0f5; --muted: #9aa1ae;
+    --grid: #262b37; --axis: #c9cdd6; --line: #2c3240; --curve: #ffffff;
+    --c1: #6c9bff; --c2: #ff6b61; --c3: #3fcf8e; --c4: #b794ff; --hl: #ffb84d;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14171f; --panel: #1b1f29; --ink: #eef0f5; --muted: #9aa1ae;
+  --grid: #262b37; --axis: #c9cdd6; --line: #2c3240; --curve: #ffffff;
+  --c1: #6c9bff; --c2: #ff6b61; --c3: #3fcf8e; --c4: #b794ff; --hl: #ffb84d;
+  color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font); font-size: 17px; line-height: 1.4;
+}
+.app {
+  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-areas: "stage tabs" "stage panel";
+  gap: 12px 20px;
+  padding-block: 16px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.tabs { grid-area: tabs; }
+.stage {
+  grid-area: stage; position: relative; min-height: 0; min-width: 0;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
+}
+.panel { grid-area: panel; display: flex; flex-direction: column; gap: 10px; min-height: 0; min-width: 0; overflow-y: auto; }
+.panel > * { flex-shrink: 0; }
+
+canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.gwrap { position: relative; height: 100%; }
+.dwrap {
+  height: 100%; overflow: auto; padding: 16px;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 28px 40px;
+}
+.plot { position: relative; flex: 0 1 380px; height: 380px; min-width: 0; }
+
+/* segmented controls */
+.seg { display: grid; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; font-size: 16px; }
+.v1 { color: var(--c1); }
+.v2 { color: var(--c2); }
+.v3 { color: var(--c3); }
+.seg.three { grid-template-columns: repeat(3, 1fr); }
+.veil {
+  position: absolute; inset: 0; z-index: 2; overflow: auto; padding: 20px;
+  display: flex; align-items: center; justify-content: center; background: var(--panel);
+}
+.prog-wrap { display: grid; gap: 14px; justify-items: center; }
+.prog-title { font-size: 20px; font-weight: 700; }
+.prog-tables { display: flex; flex-wrap: wrap; gap: 16px 40px; justify-content: center; align-items: flex-start; }
+.veil table { border-collapse: collapse; font-size: 16px; }
+.veil th, .veil td { padding: 6px 12px; text-align: center; }
+.veil th { font-weight: 700; color: var(--muted); font-size: 14px; }
+.veil td:first-child { text-align: right; font-weight: 700; }
+.dot { display: inline-block; width: 16px; height: 16px; border-radius: 50%; background: var(--line); vertical-align: middle; }
+.dot.l1 { background: var(--c2); }
+.dot.l2 { background: var(--hl); }
+.dot.l3 { background: var(--c3); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; justify-content: center; font-size: 14px; color: var(--muted); }
+.legend .dot { width: 12px; height: 12px; margin-right: 5px; }
+.veil-note { margin: 0; font-size: 15px; color: var(--muted); text-align: center; }
+select {
+  font: inherit; font-size: 15px; color: var(--ink); background: var(--panel);
+  border: 1px solid var(--line); border-radius: 8px; padding: 8px 6px; margin-right: auto; cursor: pointer;
+}
+.seg label { position: relative; cursor: pointer; }
+.seg input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.seg span { display: block; text-align: center; padding: 8px 4px; color: var(--muted); white-space: nowrap; }
+.seg label + label span { border-left: 1px solid var(--line); }
+.seg input:checked + span { background: var(--ink); color: var(--panel); font-weight: 700; }
+.seg input:focus-visible + span { outline: 2px solid var(--ink); outline-offset: -3px; }
+.seg.mini { display: inline-grid; grid-auto-flow: column; grid-auto-columns: auto; font-size: 14px; }
+.seg.mini span { padding: 4px 10px; }
+.chip { position: relative; display: inline-block; margin-left: 6px; font-size: 14px; cursor: pointer; }
+.chip input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.chip span { display: block; padding: 4px 10px; border: 1px solid var(--line); border-radius: 8px; color: var(--muted); }
+.chip input:checked + span { background: var(--ink); color: var(--panel); border-color: var(--ink); font-weight: 700; }
+.chip input:focus-visible + span { outline: 2px solid var(--ink); outline-offset: 1px; }
+
+/* note box above the questions */
+.mode-body { display: flex; flex-direction: column; gap: 10px; }
+.note { padding: 10px 14px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; font-size: 15px; color: var(--muted); }
+.note:empty { display: none; }
+.note .eq { font-size: 24px; font-weight: 700; color: var(--ink); white-space: nowrap; overflow-x: auto; line-height: 1.25; }
+
+/* question rows */
+.qs { display: grid; gap: 6px; }
+.q { padding: 1px 4px 1px 10px; border-left: 3px solid transparent; border-radius: 0 6px 6px 0; }
+.q.ok { border-left-color: var(--c3); }
+.q.bad, .q.retry { border-left-color: var(--c2); }
+.q-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 16px; min-height: 34px; }
+.q-label { font-weight: 700; white-space: nowrap; }
+.q.k1 .q-label { color: var(--c1); }
+.q.k2 .q-label { color: var(--c4); }
+.mark { margin-left: 6px; }
+.q.ok .mark { color: var(--c3); }
+.q.bad .mark, .q.retry .mark { color: var(--c2); }
+.q-in { display: flex; align-items: center; gap: 4px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.res { font-size: 14px; margin-top: 2px; font-weight: 700; color: var(--c2); }
+.res:empty { display: none; }
+.q.retry .res, .q.ok .res { color: var(--ink); font-weight: 400; }
+.steps { display: none; margin: 4px 0; padding-left: 22px; font-size: 14px; line-height: 1.45; font-variant-numeric: tabular-nums; }
+.q.open .steps { display: block; }
+.q.done { cursor: pointer; }
+.q.done input, .q.done label { pointer-events: none; }
+.q.done .q-label::after { content: " \203A"; color: var(--muted); font-weight: 400; }
+.q.open { background: color-mix(in srgb, var(--hl) 12%, transparent); }
+
+input.num {
+  width: 52px; font: inherit; font-size: 16px; padding: 4px 4px; text-align: center;
+  border: 1.5px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+input.num:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+input.num:disabled { opacity: 1; -webkit-text-fill-color: currentColor; }
+.q.retry input.num:not(:disabled), input.num.bad { border-color: var(--c2); }
+input.num.good { border-color: var(--c3); }
+input.num.ghost { color: var(--muted); }
+
+/* table of values with staggered difference columns */
+.dt { display: flex; align-items: flex-start; font-variant-numeric: tabular-nums; }
+.dcol { display: flex; flex-direction: column; }
+.dh {
+  height: 44px; display: flex; align-items: flex-end; justify-content: center; text-align: center;
+  padding: 0 6px 6px; font-size: 13px; line-height: 1.15; font-weight: 700; color: var(--muted);
+}
+.dx .dh, .dy .dh { font-size: 20px; font-style: italic; color: var(--ink); border-bottom: 2px solid var(--ink); }
+.dc { height: var(--rh); min-width: 64px; display: flex; align-items: center; justify-content: center; font-size: 24px; border-bottom: 1px solid var(--line); }
+.dy { border-left: 2px solid var(--ink); }
+.d1, .d2 { margin-left: 10px; }
+.d1 .dh { color: var(--c1); margin-bottom: calc(var(--rh) / 2); }
+.d2 .dh { color: var(--c4); margin-bottom: var(--rh); }
+.dd { position: relative; height: var(--rh); display: flex; align-items: center; padding-left: 16px; }
+.dd::before {
+  content: ""; position: absolute; left: 0; top: 8px; bottom: 8px; width: 9px;
+  border: 2px solid var(--c1); border-right: 0; border-radius: 5px 0 0 5px; opacity: 0.55;
+}
+.d2 .dd::before { border-color: var(--c4); }
+.dd input.num { width: 68px; font-size: 20px; padding: 6px 4px; }
+
+.score { font-size: 16px; font-weight: 700; }
+.score:empty { display: none; }
+.warn { font-size: 15px; font-weight: 700; color: var(--c2); text-align: right; }
+.warn:empty { display: none; }
+.pprog { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--muted); margin-top: auto; }
+.pprog .bar { flex: 1; height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
+.pprog .bar i { display: block; height: 100%; background: var(--c3); }
+.pprog button { font-size: 13px; padding: 4px 8px; color: var(--muted); }
+.footer { display: flex; gap: 8px; justify-content: flex-end; }
+button {
+  font: inherit; font-size: 15px; color: var(--ink); background: transparent;
+  border: 1px solid var(--line); border-radius: 8px; padding: 8px 16px; cursor: pointer;
+}
+button:hover { border-color: var(--muted); }
+button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+button.primary { background: var(--ink); color: var(--panel); border-color: var(--ink); font-weight: 700; }
+
+
+.seg.six { grid-template-columns: repeat(6, auto); font-size: 14px; }
+.seg.six span { padding: 8px 4px; }
+.bigeq { font-size: clamp(26px, 4vw, 44px); font-weight: 700; text-align: center; line-height: 1.3; }
+.veil th, .veil td { padding-inline: 10px; }
+.note .given { font-size: 18px; color: var(--ink); line-height: 1.35; }
+.note .given b { font-weight: 700; margin-right: 6px; }
+.veil th, .veil td { padding-block: 4px; }
+.prog-tables { gap: 12px 32px; }
+@media (max-height: 760px) and (min-width: 821px) {
+  :root { --rh: 46px; }
+  .app { padding-block: 10px; gap: 8px 16px; }
+  .panel, .mode-body { gap: 7px; }
+  .plot { flex-basis: 320px; height: 320px; }
+}
+@media (max-width: 820px) {
+  :root { --rh: 44px; }
+  html, body { height: auto; }
+  .app {
+    height: auto; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto;
+    grid-template-areas: "tabs" "stage" "panel"; gap: 10px; padding-block: 10px;
+  }
+  .gwrap { height: auto; aspect-ratio: 1 / 1; max-height: 340px; }
+  .qs { gap: 3px; }
+  .dwrap { height: auto; padding: 10px 6px; gap: 10px; }
+  .dc { min-width: 50px; font-size: 20px; }
+  .dh { height: 38px; padding: 0 2px 5px; }
+  .d1, .d2 { margin-left: 6px; }
+  .dd { padding-left: 13px; }
+  .dd input.num { width: 58px; font-size: 18px; padding: 5px 2px; }
+  .plot { flex: 1 1 100%; height: 210px; }
+  .panel { overflow: visible; }
+  .app.hide-stage .stage { display: none; }
+  .seg.six { font-size: 13px; }
+  .seg.six span { padding: 8px 3px; }
+  .pprog { margin-top: 0; }
+}
+</style>
+</head>
+<body>
+<main class="app">
+  <div class="seg six tabs" role="radiogroup" aria-label="What to practise">
+    <label><input type="radio" name="mode" id="mE" checked><span>Equation</span></label>
+    <label><input type="radio" name="mode" id="mG"><span>Graph</span></label>
+    <label><input type="radio" name="mode" id="mD"><span>Classify</span></label>
+    <label><input type="radio" name="mode" id="mF"><span>Find a</span></label>
+    <label><input type="radio" name="mode" id="mW"><span>Problem</span></label>
+    <label><input type="radio" name="mode" id="mT"><span>Think</span></label>
+  </div>
+
+  <div class="stage">
+    <div class="gwrap" id="gWrap"><canvas id="gcv" aria-label="Graph of a parabola"></canvas><div class="veil" id="veil" hidden></div></div>
+    <div class="dwrap" id="dWrap" hidden>
+      <div class="bigeq" id="dEq" hidden></div>
+      <div class="dt" id="dt"></div>
+      <div class="plot" id="plot" hidden><canvas id="dcv" aria-label="The table's points on a graph"></canvas></div>
+    </div>
+  </div>
+
+  <section class="panel">
+    <div class="mode-body" id="eBody">
+      <div class="note"><div class="eq" id="eEq"></div><span id="eLine"></span></div>
+      <div class="qs" id="eQs"></div>
+      <div class="score" id="eScore"></div>
+    </div>
+    <div class="mode-body" id="gBody" hidden>
+      <div class="note" id="gNote"></div>
+      <div class="qs" id="gQs"></div>
+      <div class="score" id="gScore"></div>
+    </div>
+    <div class="mode-body" id="dBody" hidden>
+      <div class="note" id="dNote"></div>
+      <div class="qs" id="dQs"></div>
+      <div class="score" id="dScore"></div>
+    </div>
+    <div class="mode-body" id="fBody" hidden>
+      <div class="note" id="fNote"></div>
+      <div class="qs" id="fQs"></div>
+      <div class="score" id="fScore"></div>
+    </div>
+    <div class="mode-body" id="wBody" hidden>
+      <div class="note" id="wNote"></div>
+      <div class="qs" id="wQs"></div>
+      <div class="score" id="wScore"></div>
+    </div>
+    <div class="mode-body" id="tBody" hidden>
+      <div class="note" id="tNote"></div>
+      <div class="qs" id="tQs"></div>
+      <div class="score" id="tScore"></div>
+    </div>
+    <div class="pprog" id="prog"></div>
+    <div class="warn" id="warn" role="status"></div>
+    <div class="footer">
+      <select id="eFocus" aria-label="Which form to practise">
+        <option value="mix">All forms</option>
+        <option value="std">Standard</option>
+        <option value="fac">Factored</option>
+        <option value="vtx">Vertex</option>
+      </select>
+      <button type="button" id="bNew">New</button>
+      <button type="button" class="primary" id="bCheck">Check</button>
+    </div>
+  </section>
+
+</main>
+
+<script>
+(() => {
+  "use strict";
+  const $ = id => document.getElementById(id);
+  const qsa = (sel, root = document) => [...root.querySelectorAll(sel)];
+  const MINUS = "−";
+  const FONT = '"Atkinson Hyperlegible", system-ui, sans-serif';
+  const toFrac = v => {
+    for (let d = 1; d <= 64; d++) {
+      const n = v * d;
+      if (Math.abs(n - Math.round(n)) < 1e-9) return [Math.round(n), d];
+    }
+    return null;
+  };
+  const den = v => { const f = toFrac(v); return f ? f[1] : 999; };
+  const pow2 = v => [1, 2, 4, 8].includes(den(v));   // halves, quarters and eighths only
+  const gcd = (a, b) => (b ? gcd(b, a % b) : Math.abs(a));
+  // equations with a number in front of x in a bracket are shown with fractions
+  const fmt = v => {
+    if (mode === "e" && cur.e && cur.e.frac) {
+      const f = toFrac(v);
+      if (f && f[1] > 1) return (f[0] < 0 ? MINUS : "") + Math.abs(f[0]) + "/" + f[1];
+    }
+    const r = Math.round(v * 100) / 100;
+    if (r === 0) return "0";
+    return (r < 0 ? MINUS : "") + String(Math.abs(r));
+  };
+  const abs = v => fmt(Math.abs(v));
+  const paren = v => { const t = fmt(v); return v < 0 || t.includes("/") ? `(${t})` : t; };
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const ri = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
+  const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+  const near = (u, v) => Math.abs(u - v) < 0.011;
+  function parseNum(str) {
+    const t = String(str).replace(/−/g, "-").replace(/\s+/g, "").replace(/^[xy]=/i, "");
+    if (t === "") return NaN;
+    if (/^-?\d*\.?\d+\/-?\d*\.?\d+$/.test(t)) {
+      const [n, d] = t.split("/").map(Number);
+      return d === 0 ? NaN : n / d;
+    }
+    return /^-?(\d+\.?\d*|\.\d+)$/.test(t) ? Number(t) : NaN;
+  }
+
+  // ---------- state ----------
+  let mode = "e";
+  const cur = { e: null, g: null, d: null, f: null, w: null, t: null };
+  let hover = null;
+
+  // ---------- progress (kept in this browser) ----------
+  const STORE = "parabola-graphs-differences-v1";
+  const FORM_NAMES = { std: "Standard form", fac: "Factored form", vtx: "Vertex form" };
+  const E_ORDER = {
+    std: ["form", "opens", "minmax", "roots", "axis", "optimal", "vertex", "yint", "step"],
+    fac: ["form", "opens", "minmax", "roots", "axis", "optimal", "vertex", "yint", "step"],
+    vtx: ["form", "opens", "minmax", "vertex", "axis", "optimal", "yint", "step"]
+  };
+  const G_ORDER = ["opens", "minmax", "vertex", "optimal", "axis", "roots", "yint", "step"];
+  const F_IDS = ["axis", "a", "vertex", "step"], W_IDS = ["ground", "start", "when", "max"];
+  const SKILLS = [
+    ...Object.keys(E_ORDER).flatMap(f => E_ORDER[f].map(id => `e:${f}:${id}`)),
+    ...G_ORDER.map(id => `g:${id}`),
+    "d:d1", "d:d2", "d:lin", "d:quad", "d:nei", "d:opens", "d:degree", "d:eqtype", "d:gtype",
+    ...F_IDS.map(id => `f:${id}`), ...W_IDS.map(id => `w:${id}`),
+    "t:axis", "t:minmax", "t:optsign", "t:count"
+  ];
+  let stats = {};
+  try {
+    const raw = JSON.parse(localStorage.getItem(STORE));
+    if (raw && typeof raw === "object") stats = raw;
+  } catch (e) { stats = {}; }
+  const saveStats = () => { try { localStorage.setItem(STORE, JSON.stringify(stats)); } catch (e) {} };
+  function level(key) {
+    const r = stats[key];
+    if (!Array.isArray(r) || !r.length) return 0;
+    if (r.length >= 3 && r.slice(-3).every(Boolean)) return 3;
+    return r.filter(Boolean).length * 2 >= r.length ? 2 : 1;
+  }
+  function record(key, ok) {
+    if (!Array.isArray(stats[key])) stats[key] = [];
+    stats[key].push(!!ok);
+    if (stats[key].length > 4) stats[key].shift();
+  }
+  let armed = false;
+  function renderProgress() {
+    const got = SKILLS.filter(k => level(k) === 3).length;
+    $("prog").innerHTML = `<span>${got} of ${SKILLS.length} skills mastered</span><span class="bar"><i style="width:${(got / SKILLS.length) * 100}%"></i></span><button type="button" id="bReset">${armed ? "Tap again" : "Reset"}</button>`;
+    const dotOf = key => `<span class="dot l${level(key)}"></span>`;
+    const names = [["form", "Form"], ["opens", "Opens"], ["minmax", "Min or max"], ["roots", "Zeroes"], ["axis", "Axis"], ["optimal", "Optimal value"], ["vertex", "Vertex"], ["yint", "y-intercept"], ["step", "Step pattern"]];
+    const cols = [["std", "Standard"], ["fac", "Factored"], ["vtx", "Vertex"]];
+    const rows = names.map(([id, name]) => `<tr><td>${name}</td>${cols.map(([f]) => `<td>${E_ORDER[f].includes(id) ? dotOf(`e:${f}:${id}`) : ""}</td>`).join("")}<td>${G_ORDER.includes(id) ? dotOf(`g:${id}`) : ""}</td></tr>`).join("");
+    const small = (head, key, list) => `<table><tr><th></th><th>${head}</th></tr>${list.map(([id, name]) => `<tr><td>${name}</td><td>${dotOf(`${key}:${id}`)}</td></tr>`).join("")}</table>`;
+    $("veil").innerHTML = `<div class="prog-wrap">
+      <div class="prog-title">Your progress</div>
+      <div class="prog-tables">
+        <table><tr><th></th>${cols.map(c => `<th>${c[1]}</th>`).join("")}<th>Graph</th></tr>${rows}</table>
+        ${small("Classify", "d", [["d1", "First differences"], ["d2", "Second differences"], ["lin", "Linear table"], ["quad", "Quadratic table"], ["nei", "Neither table"], ["opens", "Opens, from a table"], ["degree", "Degree"], ["eqtype", "Type from an equation"], ["gtype", "Type from a graph"]])}
+        ${small("Find a", "f", [["axis", "Axis"], ["a", "a value"], ["vertex", "Vertex"], ["step", "Step pattern"]])}
+        ${small("Problem", "w", [["ground", "Hits the ground"], ["start", "Starting height"], ["when", "Highest at"], ["max", "Maximum height"]])}
+        ${small("Think", "t", [["axis", "Axis from two points"], ["minmax", "Min or max"], ["optsign", "Sign of optimal value"], ["count", "Number of zeroes"]])}
+      </div>
+      <div class="legend"><span><span class="dot l1"></span>keep practising</span><span><span class="dot l2"></span>almost</span><span><span class="dot l3"></span>mastered</span></div>
+      <p class="veil-note">Three in a row on the first try masters a skill. The graph appears when you finish.</p>
+    </div>`;
+  }
+
+  // ---------- canvas helpers ----------
+  const mkView = cv => ({ cv, ctx: cv.getContext("2d"), W: 0, H: 0, sx: 1, sy: 1, ox: 0, oy: 0 });
+  const VG = mkView($("gcv")), VD = mkView($("dcv"));
+  function sizeView(v) {
+    const r = v.cv.getBoundingClientRect();
+    if (r.width < 2 || r.height < 2) { v.W = 0; v.H = 0; return; }
+    const dpr = window.devicePixelRatio || 1;
+    v.W = r.width; v.H = r.height;
+    v.cv.width = Math.round(v.W * dpr);
+    v.cv.height = Math.round(v.H * dpr);
+    v.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  const X = (v, x) => v.ox + x * v.sx;
+  const Y = (v, y) => v.oy - y * v.sy;
+
+  function curve(v, f, color, width, alpha, x0, x1, dash) {
+    const c = v.ctx;
+    c.save();
+    c.strokeStyle = color; c.lineWidth = width; c.globalAlpha = alpha || 1; c.lineJoin = "round";
+    c.setLineDash(dash || []);
+    c.beginPath();
+    let on = false;
+    const pa = x0 === undefined ? 0 : Math.max(0, Math.ceil(X(v, x0))), pb = x1 === undefined ? v.W : Math.min(v.W, Math.floor(X(v, x1)));
+    for (let px = pa; px <= pb; px++) {
+      const py = Y(v, f((px - v.ox) / v.sx));
+      if (!isFinite(py) || py < -2 * v.H || py > 3 * v.H) { on = false; continue; }
+      if (!on) { c.moveTo(px, py); on = true; } else c.lineTo(px, py);
+    }
+    c.stroke();
+    c.restore();
+  }
+  function line(v, x0, y0, x1, y1, color, width, dash, alpha) {
+    const c = v.ctx;
+    c.save();
+    c.strokeStyle = color; c.lineWidth = width; c.setLineDash(dash || []); c.globalAlpha = alpha || 1;
+    c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1, y1); c.stroke();
+    c.restore();
+  }
+  function arrow(v, x0, y0, x1, y1, color) {
+    const c = v.ctx, dx = x1 - x0, dy = y1 - y0, L = Math.hypot(dx, dy);
+    if (L < 12) return;
+    const ux = dx / L, uy = dy / L;
+    c.save();
+    c.strokeStyle = color; c.fillStyle = color; c.lineWidth = 3;
+    c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1 - ux * 8, y1 - uy * 8); c.stroke();
+    c.beginPath();
+    c.moveTo(x1, y1);
+    c.lineTo(x1 - ux * 12 - uy * 6, y1 - uy * 12 + ux * 6);
+    c.lineTo(x1 - ux * 12 + uy * 6, y1 - uy * 12 - ux * 6);
+    c.closePath(); c.fill();
+    c.restore();
+  }
+  function dot(v, px, py, color, rad) {
+    const c = v.ctx;
+    c.save();
+    c.beginPath(); c.arc(px, py, rad, 0, Math.PI * 2);
+    c.fillStyle = color; c.fill();
+    c.strokeStyle = css("--panel"); c.lineWidth = 2; c.stroke();
+    c.restore();
+  }
+  function halo(v, px, py) {
+    const c = v.ctx;
+    c.save();
+    c.globalAlpha = 0.3; c.fillStyle = css("--hl");
+    c.beginPath(); c.arc(px, py, 19, 0, Math.PI * 2); c.fill();
+    c.restore();
+  }
+  function label(v, text, x, y, color, align, base, fs) {
+    const c = v.ctx;
+    c.save();
+    c.font = `700 ${fs}px ${FONT}`;
+    const tw = c.measureText(text).width;
+    let lx = align === "right" ? x - tw : align === "center" ? x - tw / 2 : x;
+    lx = Math.max(4, Math.min(v.W - tw - 4, lx));
+    let ty = base === "top" ? y : base === "bottom" ? y - fs : y - fs / 2;
+    ty = Math.max(4, Math.min(v.H - fs - 4, ty));
+    c.fillStyle = css("--panel"); c.globalAlpha = 0.88;
+    c.fillRect(lx - 4, ty - 4, tw + 8, fs + 8);
+    c.globalAlpha = 1;
+    c.fillStyle = color; c.textAlign = "left"; c.textBaseline = "top";
+    c.fillText(text, lx, ty);
+    c.restore();
+  }
+  // grid lines every xs, ys; number labels every lx, ly (all whole numbers)
+  function grid(v, xs, ys, lx, ly, fs, xn = "x", yn = "y") {
+    const c = v.ctx;
+    const xa = Math.ceil(-v.ox / v.sx / xs), xb = Math.floor((v.W - v.ox) / v.sx / xs);
+    const ya = Math.ceil(-(v.H - v.oy) / v.sy / ys), yb = Math.floor(v.oy / v.sy / ys);
+    c.save();
+    c.strokeStyle = css("--grid"); c.lineWidth = 1;
+    c.beginPath();
+    for (let i = xa; i <= xb; i++) { const px = Math.round(X(v, i * xs)) + 0.5; c.moveTo(px, 0); c.lineTo(px, v.H); }
+    for (let j = ya; j <= yb; j++) { const py = Math.round(Y(v, j * ys)) + 0.5; c.moveTo(0, py); c.lineTo(v.W, py); }
+    c.stroke();
+    c.strokeStyle = css("--axis"); c.lineWidth = 1.5;
+    c.beginPath();
+    c.moveTo(0, Y(v, 0)); c.lineTo(v.W, Y(v, 0));
+    c.moveTo(X(v, 0), 0); c.lineTo(X(v, 0), v.H);
+    c.stroke();
+    c.fillStyle = css("--muted");
+    c.font = `${fs}px ${FONT}`;
+    c.textAlign = "center"; c.textBaseline = "top";
+    for (let i = xa; i <= xb; i++) {
+      const x = i * xs;
+      if (x === 0 || x % lx !== 0 || X(v, x) < 14 || X(v, x) > v.W - 14) continue;
+      c.fillText(fmt(x), X(v, x), Y(v, 0) + 5);
+    }
+    c.textAlign = "right"; c.textBaseline = "middle";
+    for (let j = ya; j <= yb; j++) {
+      const y = j * ys;
+      if (y === 0 || y % ly !== 0 || Y(v, y) < 9 || Y(v, y) > v.H - 9) continue;
+      c.fillText(fmt(y), X(v, 0) - 6, Y(v, y));
+    }
+    c.textBaseline = "top";
+    c.fillText("0", X(v, 0) - 6, Y(v, 0) + 5);
+    c.font = `italic 700 ${fs + 3}px ${FONT}`;
+    c.fillStyle = css("--axis");
+    c.textAlign = "right"; c.textBaseline = "bottom"; c.fillText(xn, v.W - 8, Y(v, 0) - 6);
+    c.textAlign = "left"; c.textBaseline = "top"; c.fillText(yn, X(v, 0) + 8, 6);
+    c.restore();
+  }
+
+  // ---------- shared question-row pieces ----------
+  const box = (id, name) => `<input type="text" class="num" id="${id}" aria-label="${name}" autocomplete="off" spellcheck="false">`;
+  const segMini = (id, opts) => `<span class="seg mini">${opts.map(([v, t]) => `<label><input type="radio" name="${id}" id="${id}-${v}" value="${v}"><span>${t}</span></label>`).join("")}</span>`;
+  const row = (id, text, inner, cls) => `<div class="q ${cls || ""}" data-id="${id}"><div class="q-row"><span class="q-label">${text}<span class="mark"></span></span><span class="q-in">${inner}</span></div><div class="res"></div><ol class="steps"></ol></div>`;
+
+  function lockQ(el, state) {
+    el.dataset.state = state;
+    el.classList.remove("retry");
+    el.classList.add(state);
+    el.querySelector(".mark").textContent = state === "ok" ? "✓" : "✗";
+    qsa("input", el).forEach(i => { i.disabled = true; });
+  }
+  function retryQ(el, text) {
+    el.classList.add("retry");
+    el.querySelector(".mark").textContent = "✗";
+    el.querySelector(".res").textContent = text;
+  }
+  function closeOut(listId, p, stepsFn, scoreId) {
+    let firstRight = 0, fixed = 0, firstBad = null, total = 0;
+    qsa(`#${listId} .q`).forEach(el => {
+      const id = el.dataset.id;
+      total++;
+      if (p.first[id]) firstRight++;
+      else if (el.dataset.state === "ok") fixed++;
+      if (el.dataset.state === "bad" && !firstBad) firstBad = el;
+      el.classList.add("done");
+      el.querySelector(".steps").innerHTML = stepsFn(id, p).map(s => `<li>${s}</li>`).join("");
+    });
+    $(scoreId).textContent = `${firstRight} of ${total} right on the first try` + (fixed ? `, ${fixed} fixed on the second` : "");
+    if (firstBad) { firstBad.classList.add("open"); p.sel = firstBad.dataset.id; }
+  }
+
+  // number-only rows: every box must match its target
+  const numGrade = (el, target) => {
+    const n = qsa('input[type="text"]', el).map(i => parseNum(i.value));
+    return { ok: target.every((t, i) => near(n[i], t)), n, blank: n.every(Number.isNaN) };
+  };
+  const radGrade = (el, want) => {
+    const ch = el.querySelector('input[type="radio"]:checked');
+    return { ok: !!ch && ch.value === want, n: [], blank: !ch };
+  };
+  // two tries, then answers and steps; used by the Find a and Problem tabs
+  function checkList(k, o) {
+    const p = cur[k];
+    if (!p || p.done) return;
+    const first = p.tries === 0;
+    let open = 0;
+    qsa(`#${o.list} .q`).forEach(el => {
+      if (el.dataset.state) return;
+      const id = el.dataset.id, g = o.grade(id, el, p), res = el.querySelector(".res");
+      if (first) { record(`${k}:${id}`, g.ok); p.first[id] = g.ok; }
+      if (g.ok) { lockQ(el, "ok"); res.textContent = ""; }
+      else if (!first || (o.binary && o.binary.has(id))) { lockQ(el, "bad"); res.textContent = `Answer: ${o.answer(id, p)}`; }
+      else { retryQ(el, (g.blank ? null : o.diag(id, p, g.n)) || o.hint(id, p)); open++; }
+    });
+    p.tries++;
+    if (first) saveStats();
+    if (open === 0) {
+      p.done = true;
+      closeOut(o.list, p, o.steps, o.score);
+      o.done(p);
+      if (window.matchMedia("(max-width: 820px)").matches) window.scrollTo({ top: 0, behavior: "smooth" });
+    } else o.retry();
+    syncUI();
+    requestAnimationFrame(() => { resizeG(); resizeD(); });
+  }
+
+  // =====================================================================
+  // READ A GRAPH
+  // =====================================================================
+  // ---------- equation strings ----------
+  const W_ = (t, cls) => (cls ? `<span class="${cls}">${t}</span>` : t);
+  function coefStr(a, cls) {
+    if (a === 1) return "";
+    if (a === -1) return W_(MINUS, cls);
+    return W_(fmt(a), cls);
+  }
+  function factor(v, cls) {
+    if (v === 0) return "x";
+    return `(x ${v > 0 ? MINUS : "+"} ${W_(abs(v), cls)})`;
+  }
+  const bare = v => factor(v).replace(/^\(|\)$/g, "");
+  function stdStr(a, b, c, col) {
+    const terms = [[a, "x²", col && "v1"], [b, "x", col && "v2"], [c, "", col && "v3"]];
+    let out = "", first = true;
+    for (const [v, x, cls] of terms) {
+      if (v === 0) continue;
+      const magTxt = Math.abs(v) === 1 && x ? "" : W_(abs(v), cls);
+      if (first) out += (v < 0 ? W_(MINUS, cls) : "") + magTxt + x;
+      else out += ` ${v < 0 ? MINUS : "+"} ${magTxt}${x}`;
+      first = false;
+    }
+    return out || "0";
+  }
+  function facStr(a, r, s, col) {
+    const ca = coefStr(a, col && "v1");
+    if (r === s) return ca + (r === 0 ? "x²" : `${factor(r, col && "v2")}²`);
+    let f1 = factor(r, col && "v2"), f2 = factor(s, col && "v3");
+    if (s === 0 && r !== 0) [f1, f2] = [f2, f1];
+    return ca + f1 + f2;
+  }
+  function vtxStr(a, h, k, col) {
+    let out = coefStr(a, col && "v1") + (h === 0 ? "x²" : `${factor(h, col && "v2")}²`);
+    if (k !== 0) out += ` ${k > 0 ? "+" : MINUS} ${W_(abs(k), col && "v3")}`;
+    return out;
+  }
+  // a bracket (mx − P); m is 1 for a plain (x − P)
+  function brk(m, P, cls) {
+    if (m === 1) return factor(P, cls);
+    return `(${m}x ${P > 0 ? MINUS : "+"} ${W_(abs(P), cls)})`;
+  }
+  const strip = t => t.replace(/^\(|\)$/g, "");
+  // y = da(mx − P)(nx − Q)
+  function facP(p, col) {
+    const ca = coefStr(p.da, col && "v1");
+    if (p.m === p.n && p.P === p.Q) return `${ca}${brk(p.m, p.P, col && "v2")}²`;
+    let f1 = brk(p.m, p.P, col && "v2"), f2 = brk(p.n, p.Q, col && "v3");
+    if (f2 === "x") [f1, f2] = [f2, f1];
+    return ca + f1 + f2;
+  }
+  const eqHTML = (p, col) => `y = ${p.form === "std" ? stdStr(p.a, p.b, p.c, col) : p.form === "fac" ? facP(p, col) : vtxStr(p.a, p.h, p.k, col)}`;
+
+  // one question row; pre keeps ids unique between the equation and graph lists
+  function qHTML(pre, id) {
+    if (id === "form") return row("form", "Form", segMini(`${pre}-form`, [["std", "Standard"], ["fac", "Factored"], ["vtx", "Vertex"]]));
+    if (id === "opens") return row("opens", "Opens", segMini(`${pre}-opens`, [["up", "Up"], ["down", "Down"]]));
+    if (id === "minmax") return row("minmax", "Vertex is a", segMini(`${pre}-minmax`, [["min", "Minimum"], ["max", "Maximum"]]));
+    if (id === "vertex") return row("vertex", "Vertex", `(${box(`${pre}-vx`, "Vertex x")}, ${box(`${pre}-vy`, "Vertex y")})`);
+    if (id === "axis") return row("axis", "Axis of symmetry", `x = ${box(`${pre}-ax`, "Axis of symmetry")}`);
+    if (id === "optimal") return row("optimal", "Optimal value", `y = ${box(`${pre}-ov`, "Optimal value")}`);
+    if (id === "yint") return row("yint", "y-intercept", `(0, ${box(`${pre}-yi`, "y-intercept")})`);
+    if (id === "step") return row("step", "Step pattern", [1, 2, 3].map(i => box(`${pre}-s${i}`, `Step ${i}`)).join(", "));
+    return row("roots", "Zeroes", `x = ${box(`${pre}-r1`, "First zero")}, ${box(`${pre}-r2`, "Second zero")}` +
+      (pre === "g" ? `<label class="chip"><input type="checkbox" id="g-none"><span>None</span></label>` : ""));
+  }
+
+  // pointers shared by every tab that asks for the step pattern or the optimal value
+  function diagStep(p, n) {
+    const a = p.a, is = arr => arr.every((t, i) => near(n[i], t));
+    if (n.some(Number.isNaN)) return "Fill in all three steps.";
+    if (a !== 1 && is([1, 3, 5])) return "That is the basic pattern. Multiply each number by a.";
+    if (is([-a, -3 * a, -5 * a])) return a < 0 ? "a is negative, so each step goes down. Use negative numbers." : "a is positive, so each step goes up.";
+    if (is([a, 2 * a, 3 * a])) return "The basic pattern is 1, 3, 5, not 1, 2, 3.";
+    if (is([a, 4 * a, 9 * a])) return "Those are the total heights. Each step is 1, 3, 5 times a.";
+    if (near(n[0], a)) return "The first step is right. Now multiply 3 and 5 by a.";
+    return null;
+  }
+  function diagOptimal(p, n) {
+    if (Number.isNaN(n[0])) return null;
+    if (p.h !== p.k && near(n[0], p.h)) return "That is the x of the vertex. The optimal value is the y.";
+    if (p.k !== 0 && near(n[0], -p.k)) return "Wrong sign.";
+    if (p.c !== p.k && near(n[0], p.c)) return "That is the y-intercept. The optimal value is at the vertex.";
+    return null;
+  }
+  const stepList = a => [1, 3, 5].map(t => fmt(a * t)).join(", ");
+
+  // every answer is a whole number that sits on a grid crossing
+  function genGraph(prev) {
+    for (;;) {
+      const a = pick([1, 1, 1, -1, -1, -1, 2, -2, 0.5, -0.5]);
+      const t = Math.random();
+      const rc = t < 0.55 ? "two" : t < 0.8 ? "none" : "one";
+      let k = 0, d = 0;
+      if (rc === "two") {
+        d = pick(Math.abs(a) === 1 ? [1, 2, 3] : Math.abs(a) === 2 ? [1, 2] : [2, 4]);
+        k = -a * d * d;
+      } else if (rc === "none") k = Math.sign(a) * ri(1, 6);
+      const h = Math.abs(a) === 0.5 ? 2 * ri(-3, 3) : ri(-6, 6);
+      const c = a * h * h + k;
+      if (h === 0 || Math.abs(c) > 9) continue;
+      const zeros = rc === "two" ? [h - d, h + d] : rc === "one" ? [h] : [];
+      if (zeros.some(z => Math.abs(z) > 9)) continue;
+      if (prev && prev.a === a && prev.h === h && prev.k === k) continue;
+      return { a, h, k, c, zeros, rc };
+    }
+  }
+
+  function newGraph() {
+    const p = genGraph(cur.g);
+    Object.assign(p, { tries: 0, done: false, sel: null, first: {} });
+    cur.g = p;
+    $("gQs").innerHTML = G_ORDER.map(id => qHTML("g", id)).join("");
+    $("gNote").textContent = "";
+    $("gScore").textContent = "";
+    hover = null;
+    syncUI();
+    drawG();
+  }
+
+  function gradeG(id, el, p) {
+    const n = qsa('input[type="text"]', el).map(i => parseNum(i.value));
+    const ch = el.querySelector('input[type="radio"]:checked');
+    const c = ch ? ch.value : null;
+    const up = p.a > 0, z = p.zeros;
+    let ok = false, none = false;
+    if (id === "opens") ok = c === (up ? "up" : "down");
+    else if (id === "minmax") ok = c === (up ? "min" : "max");
+    else if (id === "vertex") ok = near(n[0], p.h) && near(n[1], p.k);
+    else if (id === "axis") ok = near(n[0], p.h);
+    else if (id === "optimal") ok = near(n[0], p.k);
+    else if (id === "step") ok = [1, 3, 5].every((t, i) => near(n[i], p.a * t));
+    else if (id === "yint") ok = near(n[0], p.c);
+    else {
+      none = $("g-none").checked;
+      if (z.length === 0) ok = none;
+      else if (none) ok = false;
+      else if (z.length === 1) ok = (near(n[0], z[0]) && (Number.isNaN(n[1]) || near(n[1], z[0]))) || (Number.isNaN(n[0]) && near(n[1], z[0]));
+      else ok = (near(n[0], z[0]) && near(n[1], z[1])) || (near(n[0], z[1]) && near(n[1], z[0]));
+    }
+    const blank = c === null && !none && (n.length === 0 || n.every(Number.isNaN));
+    return { ok, n, none, blank };
+  }
+
+  function answerG(id, p) {
+    const up = p.a > 0, z = p.zeros;
+    if (id === "opens") return up ? "Up" : "Down";
+    if (id === "minmax") return up ? "Minimum" : "Maximum";
+    if (id === "vertex") return `(${fmt(p.h)}, ${fmt(p.k)})`;
+    if (id === "axis") return `x = ${fmt(p.h)}`;
+    if (id === "optimal") return `y = ${fmt(p.k)}`;
+    if (id === "step") return stepList(p.a);
+    if (id === "yint") return `(0, ${fmt(p.c)})`;
+    return z.length === 0 ? "None" : z.length === 1 ? `x = ${fmt(z[0])}` : `x = ${fmt(z[0])} and x = ${fmt(z[1])}`;
+  }
+
+  // a pointer for the second try: names the slip when it can, never the answer
+  function diagnoseG(id, p, g) {
+    const n = g.n, h = p.h, k = p.k, c = p.c, z = p.zeros;
+    const has = v => n.some(t => near(t, v));
+    if (id === "step") return diagStep(p, n);
+    if (id === "optimal") return diagOptimal(p, n);
+    if (id === "vertex") {
+      if (n.some(Number.isNaN)) return "Fill in both x and y.";
+      if (h !== k && near(n[0], k) && near(n[1], h)) return "x and y are swapped. x comes first.";
+      if (near(n[0], -h) && near(n[1], k)) return "x has the wrong sign. Is the vertex left or right of the y axis?";
+      if (k !== 0 && near(n[0], h) && near(n[1], -k)) return "y has the wrong sign. Is the vertex above or below the x axis?";
+      if (near(n[0], 0) && near(n[1], c)) return "That is the y-intercept. The vertex is the turning point.";
+      if (k !== 0 && near(n[1], 0) && z.some(r => near(n[0], r))) return "That is a zero. The vertex is the turning point.";
+      if (near(n[0], h)) return "x is right. Check y.";
+      if (near(n[1], k)) return "y is right. Check x.";
+      return null;
+    }
+    if (id === "axis") {
+      if (Number.isNaN(n[0])) return null;
+      if (near(n[0], -h)) return "Wrong sign. Is the vertex left or right of the y axis?";
+      if (k !== h && near(n[0], k)) return "That is the y of the vertex. The axis is a vertical line, so use x.";
+      if (z.length === 2 && z.some(r => near(n[0], r))) return "That is a zero. The axis goes through the vertex.";
+      return null;
+    }
+    if (id === "yint") {
+      if (Number.isNaN(n[0])) return null;
+      if (z.some(r => near(n[0], r))) return "That is on the x axis. Look where the curve crosses the y axis.";
+      if (near(n[0], k)) return "That is the y of the vertex. Look where the curve crosses the y axis.";
+      if (c !== 0 && near(n[0], -c)) return "Wrong sign. Is it above or below the x axis?";
+      return null;
+    }
+    if (id === "roots") {
+      if (z.length === 0) return "Does the curve touch the x axis at all?";
+      if (g.none) return "Look again. The curve touches the x axis.";
+      const both = !n.some(Number.isNaN);
+      if (z.length === 1) {
+        if (has(-z[0])) return "Wrong sign. Is it left or right of the y axis?";
+        if (both && !near(n[0], n[1])) return "The curve only touches the x axis once.";
+        return null;
+      }
+      if (both && z.every(r => r !== 0) && ((near(n[0], -z[0]) && near(n[1], -z[1])) || (near(n[0], -z[1]) && near(n[1], -z[0])))) return "Both signs are flipped. Left of the y axis is negative.";
+      if (z.some(r => has(r))) return both ? "One zero is right. Check the other." : "That is one zero. Find the other one.";
+      if (both && near(n[0], h) && near(n[1], k)) return "That is the vertex. Zeroes are where the curve crosses the x axis.";
+      if (!z.some(r => near(r, c)) && has(c)) return "Zeroes are on the x axis, not the y axis.";
+      return null;
+    }
+    return null;
+  }
+
+  function hintG(id) {
+    if (id === "vertex") return "Find the turning point, then read its x and y.";
+    if (id === "axis") return "It is the vertical line through the vertex.";
+    if (id === "optimal") return "It is the y of the vertex.";
+    if (id === "roots") return "Zeroes are where the curve crosses the x axis.";
+    if (id === "step") return "Start at the vertex. Go over 1 each time and count how far the curve goes up or down.";
+    return "Find where the curve crosses the y axis.";
+  }
+
+  function stepsG(id, p) {
+    const up = p.a > 0, z = p.zeros;
+    if (id === "opens") return [`Both arms point ${up ? "up" : "down"}, so it opens ${up ? "up" : "down"}`];
+    if (id === "minmax") return [`It opens ${up ? "up" : "down"}, so the vertex is the ${up ? "lowest" : "highest"} point`, `That makes it a ${up ? "minimum" : "maximum"}`];
+    if (id === "vertex" && p.k === 0) return ["Find the turning point", `It sits on the x axis at x = ${fmt(p.h)}, so y = 0`, `Vertex (${fmt(p.h)}, 0)`];
+    if (id === "vertex") return [
+      "Find the turning point",
+      `Read ${p.k > 0 ? "down" : "up"} to the x axis: x = ${fmt(p.h)}`,
+      `Read across to the y axis: y = ${fmt(p.k)}`,
+      `Vertex (${fmt(p.h)}, ${fmt(p.k)})`];
+    if (id === "axis") {
+      const s = ["It is the vertical line through the vertex", `The vertex is at x = ${fmt(p.h)}, so the axis is x = ${fmt(p.h)}`];
+      if (z.length === 2) s.push(`Check: halfway between the zeroes is (${fmt(z[0])} + ${paren(z[1])}) ÷ 2 = ${fmt(p.h)}`);
+      return s;
+    }
+    if (id === "optimal") return ["The optimal value is the y of the vertex", `The vertex is (${fmt(p.h)}, ${fmt(p.k)}), so y = ${fmt(p.k)}`];
+    if (id === "step") return ["Start at the vertex and go over 1 each time", `The curve goes ${up ? "up" : "down"} ${abs(p.a)}, then ${abs(3 * p.a)}, then ${abs(5 * p.a)}`, `Step pattern: ${stepList(p.a)}`];
+    if (id === "yint") return ["It is where the curve crosses the y axis (x = 0)", `It crosses at y = ${fmt(p.c)}, so (0, ${fmt(p.c)})`];
+    if (z.length === 2) return ["Zeroes are where the curve crosses the x axis (y = 0)", `It crosses at x = ${fmt(z[0])} and x = ${fmt(z[1])}`];
+    if (z.length === 1) return ["Zeroes are where the curve touches the x axis (y = 0)", `Only the vertex touches it, so there is one zero: x = ${fmt(z[0])}`];
+    return ["Zeroes are where the curve crosses the x axis (y = 0)", `The whole curve is ${up ? "above" : "below"} the x axis, so there are no zeroes`];
+  }
+
+  const BINARY = new Set(["opens", "minmax"]);
+  function checkG() {
+    const p = cur.g;
+    if (!p || p.done) return;
+    const first = p.tries === 0;
+    let open = 0;
+    qsa("#gQs .q").forEach(el => {
+      if (el.dataset.state) return;
+      const id = el.dataset.id;
+      const g = gradeG(id, el, p);
+      const res = el.querySelector(".res");
+      if (first) { record(`g:${id}`, g.ok); p.first[id] = g.ok; }
+      if (g.ok) { lockQ(el, "ok"); res.textContent = ""; }
+      else if (!first || BINARY.has(id)) { lockQ(el, "bad"); res.textContent = `Answer: ${answerG(id, p)}`; }
+      else { retryQ(el, (g.blank ? null : diagnoseG(id, p, g)) || hintG(id)); open++; }
+    });
+    p.tries++;
+    if (first) saveStats();
+    if (open === 0) {
+      p.done = true;
+      closeOut("gQs", p, stepsG, "gScore");
+      $("gNote").innerHTML = `<div class="eq">y = ${vtxStr(p.a, p.h, p.k)}</div>Tap any question to see how to read it.`;
+      if (window.matchMedia("(max-width: 820px)").matches) window.scrollTo({ top: 0, behavior: "smooth" });
+    } else $("gNote").textContent = "Fix the ones marked ✗, then check again.";
+    syncUI();
+    drawG();
+  }
+
+  function resizeG() { sizeView(VG); drawG(); }
+
+  // Find a: what he is given, before the parabola is revealed
+  function drawGiven(v, p, lfs) {
+    const hl = css("--hl"), red = css("--c2"), blue = css("--c1");
+    if (p.variant === "opt") {
+      line(v, 0, Y(v, p.k), v.W, Y(v, p.k), hl, 2.5, [8, 6]);
+      label(v, `optimal value ${fmt(p.k)}`, 10, Y(v, p.k) + (p.k < 0 ? 10 : -10), hl, "left", p.k < 0 ? "top" : "bottom", lfs);
+    }
+    p.zeros.forEach((z, i) => {
+      dot(v, X(v, z), Y(v, 0), red, 7);
+      label(v, `(${fmt(z)}, 0)`, X(v, z) + (i === 0 ? -10 : 10), Y(v, 0) + (p.k < 0 ? 12 : -12), red, i === 0 ? "right" : "left", p.k < 0 ? "top" : "bottom", lfs);
+    });
+    if (p.variant === "pt") {
+      dot(v, X(v, p.x0), Y(v, p.y0), blue, 7);
+      label(v, `(${fmt(p.x0)}, ${fmt(p.y0)})`, X(v, p.x0) + 12, Y(v, p.y0), blue, "left", "middle", lfs);
+    }
+  }
+
+  function drawG() {
+    if (mode === "w") { drawW(); return; }
+    if (mode === "t") { drawT(); return; }
+    const v = VG, p = mode === "e" ? cur.e : mode === "f" ? cur.f : cur.g;
+    if (!v.W || !p) return;
+    v.sx = v.sy = Math.min(v.W, v.H) / 21;
+    v.ox = v.W / 2; v.oy = v.H / 2;
+    const c = v.ctx;
+    c.clearRect(0, 0, v.W, v.H);
+    const fs = Math.max(10, Math.min(14, v.sx * 0.5)), lfs = fs + 2;
+    grid(v, 1, 1, 2, 2, fs);
+    const f = x => p.a * (x - p.h) * (x - p.h) + p.k;
+    const ink = css("--ink"), hl = css("--hl");
+    const sel = p.done ? p.sel : null;
+    const vx = X(v, p.h), vy = Y(v, p.k);
+    if (!p.done) {
+      if (mode === "g") curve(v, f, css("--curve"), 3.5);
+      if (mode === "f") drawGiven(v, p, lfs);
+      v.cv.style.cursor = "";
+      return;
+    }
+    if (sel === "axis") line(v, vx, 0, vx, v.H, hl, 4, [8, 6]);
+    else line(v, vx, 0, vx, v.H, ink, 1.5, [4, 5], 0.45);
+    if (sel === "optimal") line(v, X(v, 0), vy, vx, vy, hl, 3, [6, 5]);
+    curve(v, f, css("--curve"), 3.5);
+
+    label(v, `x = ${fmt(p.h)}`, vx + 8, v.H - 8, sel === "axis" ? hl : ink, "left", "bottom", lfs);
+    const s = p.a > 0 ? 1 : -1;
+    if (sel === "opens") {
+      const d1 = Math.sqrt(3 / Math.abs(p.a)), d2 = Math.sqrt(6 / Math.abs(p.a));
+      [-1, 1].forEach(side => arrow(v, X(v, p.h + side * d1), Y(v, p.k + s * 3), X(v, p.h + side * d2), Y(v, p.k + s * 6), hl));
+    }
+    if (sel === "step") {
+      // over 1, then up or down a, 3a, 5a
+      const blue = css("--c1");
+      for (let i = 0; i < 3; i++) {
+        const xa = p.h + i, ya = p.k + p.a * i * i, yb = p.k + p.a * (i + 1) * (i + 1);
+        line(v, X(v, xa), Y(v, ya), X(v, xa + 1), Y(v, ya), blue, 2.5, [5, 4]);
+        if (Math.abs(Y(v, yb) - Y(v, ya)) < 12) line(v, X(v, xa + 1), Y(v, ya), X(v, xa + 1), Y(v, yb), blue, 3);
+        else arrow(v, X(v, xa + 1), Y(v, ya), X(v, xa + 1), Y(v, yb), blue);
+        const my = (Y(v, ya) + Y(v, yb)) / 2;
+        if (my > 8 && my < v.H - 8) label(v, fmt(p.a * (2 * i + 1)), X(v, xa + 1) + 10, my, blue, "left", "middle", lfs);
+      }
+    }
+    if (p.zeros.length === 2) {
+      const dy = p.k < 0 ? 12 : -12, base = p.k < 0 ? "top" : "bottom";
+      p.zeros.forEach((z, i) => {
+        if (sel === "roots") halo(v, X(v, z), Y(v, 0));
+        dot(v, X(v, z), Y(v, 0), css("--c2"), 7);
+        label(v, `(${fmt(z)}, 0)`, X(v, z) + (i === 0 ? -10 : 10), Y(v, 0) + dy, css("--c2"), i === 0 ? "right" : "left", base, lfs);
+      });
+    }
+    if (sel === "yint") halo(v, X(v, 0), Y(v, p.c));
+    dot(v, X(v, 0), Y(v, p.c), css("--c3"), 7);
+    label(v, `(0, ${fmt(p.c)})`, X(v, 0) + (p.h > 0 ? -12 : 12), Y(v, p.c), css("--c3"), p.h > 0 ? "right" : "left", "middle", lfs);
+    if (mode === "f" && p.variant === "pt") {
+      if (sel === "a") halo(v, X(v, p.x0), Y(v, p.y0));
+      dot(v, X(v, p.x0), Y(v, p.y0), css("--c1"), 7);
+      label(v, `(${fmt(p.x0)}, ${fmt(p.y0)})`, X(v, p.x0) + (p.x0 > p.h ? 12 : -12), Y(v, p.y0), css("--c1"), p.x0 > p.h ? "left" : "right", "middle", lfs);
+    }
+    if (sel === "vertex" || sel === "minmax" || sel === "optimal" || (sel === "a" && p.variant === "opt") || (sel === "roots" && p.zeros.length === 1)) halo(v, vx, vy);
+    dot(v, vx, vy, p.zeros.length === 1 ? css("--c2") : ink, 7);
+    const vText = sel === "minmax" ? (p.a > 0 ? "minimum" : "maximum") : sel === "optimal" ? `optimal value ${fmt(p.k)}` : `(${fmt(p.h)}, ${fmt(p.k)})`;
+    label(v, vText, vx + (sel === "step" ? -12 : 12), vy + s * 12, ink, sel === "step" ? "right" : "left", s > 0 ? "top" : "bottom", lfs);
+
+    // ordered pair under the pointer, once the answers are in
+    if (!hover) { v.cv.style.cursor = ""; return; }
+    let bx = null, bd = Infinity;
+    for (let px = hover[0] - 40; px <= hover[0] + 40; px++) {
+      const x = (px - v.ox) / v.sx;
+      const dd = Math.hypot(px - hover[0], Y(v, f(x)) - hover[1]);
+      if (dd < bd) { bd = dd; bx = x; }
+    }
+    if (bd > 24) { v.cv.style.cursor = ""; return; }
+    v.cv.style.cursor = "crosshair";
+    const hx = Math.round(bx * 2) / 2, hy = f(hx);
+    const px = X(v, hx), py = Y(v, hy), muted = css("--muted");
+    line(v, px, py, px, Y(v, 0), muted, 1.5, [3, 4], 0.8);
+    line(v, px, py, X(v, 0), py, muted, 1.5, [3, 4], 0.8);
+    c.save();
+    c.beginPath(); c.arc(px, py, 7, 0, Math.PI * 2);
+    c.fillStyle = css("--panel"); c.fill();
+    c.strokeStyle = ink; c.lineWidth = 3; c.stroke();
+    c.restore();
+    const right = px < v.W - 140;
+    label(v, `(${fmt(hx)}, ${fmt(hy)})`, px + (right ? 14 : -14), py - 14, ink, right ? "left" : "right", "bottom", lfs);
+  }
+
+  // =====================================================================
+  // READ AN EQUATION
+  // =====================================================================
+  // standard and factored equations are both built from two brackets: y = da(mx − P)(nx − Q)
+  function genEq(f, prev) {
+    const t = Math.random();
+    for (;;) {
+      let p;
+      if (f === "vtx") {
+        const a = pick([-3, -2, -1, -0.5, 0.5, 1, 2, 3]), h = ri(-6, 6), k = ri(-8, 8);
+        if (h === 0 || k === 0) continue;
+        p = { form: f, a, h, k, b: -2 * a * h, c: a * h * h + k };
+        const D = p.b * p.b - 4 * p.a * p.c;
+        p.zeros = D < 0 ? [] : D === 0 ? [h] : [(-p.b - Math.sqrt(D)) / (2 * a), (-p.b + Math.sqrt(D)) / (2 * a)].sort((u, v) => u - v);
+      } else {
+        let da, m = 1, n = 1, P, Q, kind = "tri";
+        if (f === "fac") {
+          if (t < 0.3) { kind = "coef"; da = pick([1, -1, 2, -2]); m = pick([2, 2, 4]); n = pick([1, 1, 2]); P = ri(-7, 7); Q = ri(-7, 7); }
+          else { da = pick([-2, -1, 1, 2]); P = ri(-6, 6); Q = ri(-6, 6); }
+        } else if (t < 0.55) { da = pick([1, 1, 1, -1, -1, 2, -2, 3]); P = ri(-7, 7); Q = ri(-7, 7); }
+        else if (t < 0.7) { kind = "sq"; da = pick([1, 1, -1, 2, -2]); P = Q = pick([-5, -4, -3, -2, -1, 1, 2, 3, 4, 5]); }
+        else if (t < 0.82) { kind = "dos"; da = pick([1, 1, -1, 2, -2, 3]); P = ri(1, 3); Q = -P; }
+        else { kind = "dec"; da = 1; m = 2; n = pick([1, 1, 2]); P = ri(-7, 7); Q = ri(-7, 7); }
+        if (m > 1 && (P === 0 || gcd(m, P) !== 1)) continue;
+        if (n > 1 && (Q === 0 || gcd(n, Q) !== 1)) continue;
+        if (kind === "dec" && Q === 0) continue;
+        const r = P / m, s = Q / n;
+        if (kind !== "sq" && r === s) continue;
+        const a = da * m * n, b = -da * (m * Q + n * P), c = da * P * Q, h = (r + s) / 2, k = a * (h - r) * (h - s);
+        if (Math.abs(r) > 8 || Math.abs(s) > 8 || Math.abs(k) > 10) continue;
+        if (f === "fac" && kind === "tri" && (Math.abs(r - s) > 8 || Math.abs(k) > 9)) continue;
+        if (kind === "coef" && (!pow2(h) || !pow2(k) || Math.abs(c) > 30)) continue;
+        if (f === "std" && (Math.abs(b) > 12 || Math.abs(c) > 30)) continue;
+        if (kind === "dec" && (den(h) > 4 || !pow2(k))) continue;
+        p = { form: f, kind, a, b, c, h, k, r, s, da, m, n, P, Q, frac: kind === "coef" || kind === "dec" };
+        p.zeros = r === s ? [r] : [Math.min(r, s), Math.max(r, s)];
+      }
+      if (prev && prev.a === p.a && prev.b === p.b && prev.c === p.c) continue;
+      return p;
+    }
+  }
+
+  let lastForms = [];
+  function pickForm() {
+    const focus = $("eFocus").value;
+    if (focus !== "mix") return focus;
+    const WT = [1, 1.5, 0.8, 0.2];
+    const forms = ["std", "fac", "vtx"];
+    const w = forms.map(f => {
+      let s = 0;
+      E_ORDER[f].forEach(id => { s += WT[level(`e:${f}:${id}`)]; });
+      s = 0.2 + s / E_ORDER[f].length;
+      return lastForms.length >= 2 && lastForms.every(x => x === f) ? s * 0.2 : s;
+    });
+    let t = Math.random() * w.reduce((u, v) => u + v, 0);
+    for (let i = 0; i < forms.length; i++) { t -= w[i]; if (t <= 0) return forms[i]; }
+    return forms[2];
+  }
+
+  function newEq() {
+    const f = pickForm();
+    lastForms = [...lastForms, f].slice(-2);
+    const p = genEq(f, cur.e);
+    Object.assign(p, { tries: 0, done: false, sel: null, first: {} });
+    // skip Form when it is fixed by the menu or when the equation fits two forms; skip the step pattern when a is hidden in the brackets
+    p.ids = E_ORDER[f].filter(id => !(id === "form" && ($("eFocus").value !== "mix" || (f === "std" && p.b === 0))) && !(id === "step" && p.kind === "coef"));
+    cur.e = p;
+    $("eEq").innerHTML = eqHTML(p, false);
+    $("eLine").textContent = "Answer using only the equation.";
+    $("eQs").innerHTML = p.ids.map(id => qHTML("e", id)).join("");
+    $("eScore").textContent = "";
+    hover = null;
+    syncUI();
+    drawG();
+  }
+
+  function gradeE(id, el, p) {
+    if (id === "form") {
+      const ch = el.querySelector("input:checked");
+      return { ok: !!ch && ch.value === p.form, n: [], blank: !ch };
+    }
+    if (id !== "roots") return gradeG(id, el, p);
+    const n = qsa('input[type="text"]', el).map(i => parseNum(i.value)), z = p.zeros;
+    const ok = z.length === 1
+      ? (near(n[0], z[0]) && (Number.isNaN(n[1]) || near(n[1], z[0]))) || (Number.isNaN(n[0]) && near(n[1], z[0]))
+      : (near(n[0], z[0]) && near(n[1], z[1])) || (near(n[0], z[1]) && near(n[1], z[0]));
+    return { ok, n, blank: n.every(Number.isNaN) };
+  }
+
+  // a pointer for the second try: names the slip when it can, never the answer
+  function diagnoseE(id, p, n) {
+    const f = p.form;
+    if (id === "step") return diagStep(p, n);
+    if (id === "roots") {
+      const z = p.zeros, typed = n.filter(t => !Number.isNaN(t));
+      const got = v => typed.some(t => near(t, v));
+      if (!typed.length) return null;
+      if ((p.m > 1 && got(p.P) && !z.some(r => near(r, p.P))) || (p.n > 1 && got(p.Q) && !z.some(r => near(r, p.Q)))) return "Divide by the number in front of x.";
+      if (z.length === 1) {
+        if (got(-z[0])) return "Wrong sign. The bracket must equal 0.";
+        if (typed.length === 2 && !near(typed[0], typed[1])) return "Both brackets are the same, so there is only one zero.";
+        return null;
+      }
+      if (typed.length === 2 && z.every(r => r !== 0 && got(-r))) return f === "std" ? "Those are the numbers inside the brackets. The zeroes have the opposite signs." : "Both signs are flipped. Each bracket must equal 0.";
+      if (z.some(r => got(r))) return typed.length === 2 ? "One zero is right. Check the other." : "That is one zero. Find the other one.";
+      return null;
+    }
+    if (n.some(Number.isNaN)) return null;
+    if (id === "optimal") return diagOptimal(p, n);
+    if (id === "vertex") {
+      if (p.h !== 0 && near(n[0], -p.h) && near(n[1], p.k)) return f === "vtx" ? "x has the wrong sign. What x makes the bracket equal 0?" : "x has the wrong sign.";
+      if (!near(p.h, p.k) && near(n[0], p.k) && near(n[1], p.h)) return "x and y are swapped.";
+      if (near(n[0], p.h)) return f === "vtx" ? "x is right. y is the number at the end (k)." : "x is right. y is the optimal value.";
+      if (near(n[1], p.k)) return "y is right. x is the axis of symmetry.";
+    }
+    if (id === "axis") {
+      if (p.h !== 0 && near(n[0], -p.h)) return f === "std" ? `Wrong sign. Remember the negative in ${MINUS}b ÷ 2a.` : f === "vtx" ? "Wrong sign. What x makes the bracket equal 0?" : "Wrong sign.";
+      if (f === "std" && p.b !== 0 && near(n[0], -p.b / p.a)) return "Divide by 2a, not just a.";
+      if (f === "fac" && (near(n[0], p.r) || near(n[0], p.s))) return "That is a zero. The axis is halfway between the two zeroes.";
+      if (f === "fac" && p.h !== 0 && near(n[0], p.r + p.s)) return "Now divide the sum of the zeroes by 2.";
+    }
+    if (id === "yint") {
+      if (f === "std" && (near(n[0], p.a) || near(n[0], p.b))) return "Use the number with no x beside it.";
+      if (f === "fac" && p.da !== 1 && near(n[0], p.P * p.Q)) return "Multiply by a as well (the number in front).";
+      if (f === "fac" && p.c !== 0 && near(n[0], -p.c)) return "Check the signs when you multiply.";
+      if (f === "vtx" && near(n[0], p.k)) return "That is k. Substitute x = 0 and work it out.";
+      if (f === "vtx" && near(n[0], p.a * p.h * p.h)) return "Almost. Add k at the end.";
+      if (f === "vtx" && p.a !== 1 && near(n[0], p.h * p.h + p.k)) return "Multiply the squared bracket by a.";
+      if (f === "vtx" && near(n[0], -p.a * p.h * p.h + p.k)) return "Squaring always gives a positive number.";
+    }
+    return null;
+  }
+
+  function hintE(id, p) {
+    const f = p.form;
+    if (id === "form") return "Brackets multiplied? One squared bracket? Or no brackets at all?";
+    if (id === "vertex") return f === "vtx" ? "Read (h, k) from the equation. Watch the sign of h." : "x is the axis of symmetry. y is the optimal value.";
+    if (id === "axis") return f === "std" ? `Use x = ${MINUS}b ÷ 2a, or go halfway between the zeroes.` : f === "fac" ? "It is halfway between the zeroes." : "It is the x of the vertex (h).";
+    if (id === "optimal") return f === "vtx" ? "It is the y of the vertex: the number at the end (k)." : "Put the x of the axis of symmetry into the equation.";
+    if (id === "roots") return f === "std" ? "Factor first. Then set each bracket equal to 0." : "Set each bracket equal to 0.";
+    if (id === "step") return "Multiply 1, 3, 5 by a.";
+    return "Substitute x = 0.";
+  }
+
+  function stepsE(id, p) {
+    const f = p.form, up = p.a > 0;
+    const aS = f === "fac" ? p.da : p.a;   // the a he can see in the equation
+    const aTxt = aS === 1 ? "" : aS === -1 ? MINUS : fmt(aS);
+    const pm = v => `${v < 0 ? MINUS : "+"} ${abs(v)}`;
+    const sub = (x0, v) => (v === 0 ? fmt(x0) : `${fmt(x0)} ${v > 0 ? MINUS : "+"} ${abs(v)}`);
+    const subB = (m, P, x0) => (m === 1 ? `(${sub(x0, P)})` : `(${m}(${fmt(x0)}) ${P > 0 ? MINUS : "+"} ${abs(P)})`);
+    const zeroLine = (m, P) => (m > 1 ? `${strip(brk(m, P))} = 0 gives ${m}x = ${fmt(P)}, so x = ${fmt(P / m)}`
+      : P === 0 ? "The factor x on its own is 0 when x = 0" : `${strip(brk(1, P))} = 0 gives x = ${fmt(P)}`);
+    if (id === "form") return [f === "std" ? "No brackets, fully expanded: y = ax² + bx + c" : f === "fac" ? `Brackets multiplied together: y = a(x ${MINUS} s)(x ${MINUS} t)` : `One squared bracket plus a number: y = a(x ${MINUS} h)² + k`];
+    if (id === "opens") return [`a = ${fmt(aS)}`, `a is ${up ? "positive" : "negative"}, so it opens ${up ? "up" : "down"}`];
+    if (id === "minmax") return [`a = ${fmt(aS)} is ${up ? "positive" : "negative"}, so it opens ${up ? "up" : "down"}`, `The vertex is the ${up ? "lowest" : "highest"} point: a ${up ? "minimum" : "maximum"}`];
+    if (id === "step") return [`a = ${fmt(p.a)}`, `${paren(p.a)} × (1, 3, 5) = ${stepList(p.a)}`];
+    if (id === "roots") {
+      const s = [];
+      if (f === "std" && p.m === 1 && p.n === 1) {
+        if (p.da !== 1) s.push(`Common factor ${fmt(p.da)}: y = ${coefStr(p.da)}(${stdStr(1, -(p.P + p.Q), p.P * p.Q)})`);
+        if (p.P === p.Q) s.push(`Perfect square: y = ${facP(p)}`);
+        else if (p.Q === -p.P) s.push(`Difference of squares: y = ${facP(p)}`);
+        else if (p.P * p.Q === 0) s.push(`Common factor x: y = ${facP(p)}`);
+        else s.push(`Product ${fmt(p.P * p.Q)}, sum ${fmt(-(p.P + p.Q))}: the numbers are ${fmt(-p.P)} and ${fmt(-p.Q)}`, `y = ${facP(p)}`);
+      } else if (f === "std") {
+        s.push(`Product ${fmt(p.a * p.c)}, sum ${fmt(p.b)}: the numbers are ${fmt(-p.m * p.Q)} and ${fmt(-p.n * p.P)}`, `Decompose and group: y = ${facP(p)}`);
+      }
+      if (p.zeros.length === 1) s.push(`${strip(brk(p.m, p.P))} = 0 gives x = ${fmt(p.r)} (only one zero)`);
+      else s.push(zeroLine(p.m, p.P), zeroLine(p.n, p.Q));
+      return s;
+    }
+    if (id === "axis") {
+      if (f === "std") {
+        const s = p.b === 0 ? ["There is no x term, so b = 0", `x = ${MINUS}b ÷ 2a = 0`]
+          : [`x = ${MINUS}b ÷ 2a`, `x = ${MINUS}${paren(p.b)} ÷ (2 × ${paren(p.a)})`, `x = ${fmt(p.h)}`];
+        if (p.zeros.length === 2) s.push(`Check: halfway between the zeroes is (${fmt(p.zeros[0])} + ${paren(p.zeros[1])}) ÷ 2 = ${fmt(p.h)}`);
+        return s;
+      }
+      if (f === "fac") return ["Halfway between the zeroes", `x = (${fmt(p.r)} + ${paren(p.s)}) ÷ 2`, `x = ${fmt(p.h)}`];
+      return [`${bare(p.h)} = 0 when x = ${fmt(p.h)}`, `Axis: x = ${fmt(p.h)}`];
+    }
+    if (id === "optimal") {
+      if (f === "vtx") return ["The optimal value is the y of the vertex", `That is the number at the end: y = ${fmt(p.k)}`];
+      if (f === "std") return [
+        `Substitute x = ${fmt(p.h)} (the axis of symmetry)`,
+        `y = ${aTxt}(${fmt(p.h)})²${p.b === 0 ? "" : ` ${pm(p.b)}(${fmt(p.h)})`}${p.c === 0 ? "" : " " + pm(p.c)}`,
+        `y = ${fmt(p.k)}`];
+      return [
+        `Substitute x = ${fmt(p.h)} (the axis of symmetry)`,
+        `y = ${aTxt}${subB(p.m, p.P, p.h)}${subB(p.n, p.Q, p.h)}`,
+        `y = ${paren(p.da)} × ${paren(p.m * p.h - p.P)} × ${paren(p.n * p.h - p.Q)} = ${fmt(p.k)}`];
+    }
+    if (id === "vertex") {
+      if (f === "vtx") return [`${bare(p.h)} = 0 when x = ${fmt(p.h)}, so h = ${fmt(p.h)}`, `The number at the end is k = ${fmt(p.k)}`, `Vertex (${fmt(p.h)}, ${fmt(p.k)})`];
+      return [`x is the axis of symmetry: x = ${fmt(p.h)}`, `y is the optimal value: y = ${fmt(p.k)}`, `Vertex (${fmt(p.h)}, ${fmt(p.k)})`];
+    }
+    if (f === "std") return ["Substitute x = 0", "Every x term becomes 0", `y = ${fmt(p.c)}`];
+    if (f === "fac") return ["Substitute x = 0", `y = ${aTxt}${subB(p.m, p.P, 0)}${subB(p.n, p.Q, 0)}`, `y = ${paren(p.da)} × ${paren(-p.P)} × ${paren(-p.Q)} = ${fmt(p.c)}`];
+    return ["Substitute x = 0", `y = ${aTxt}(${sub(0, p.h)})² ${pm(p.k)}`, `y = ${paren(p.a)} × ${fmt(p.h * p.h)} ${pm(p.k)} = ${fmt(p.c)}`];
+  }
+
+  function checkE() {
+    const p = cur.e;
+    if (!p || p.done) return;
+    const first = p.tries === 0;
+    let open = 0;
+    qsa("#eQs .q").forEach(el => {
+      if (el.dataset.state) return;
+      const id = el.dataset.id;
+      const g = gradeE(id, el, p);
+      const res = el.querySelector(".res");
+      if (first) { record(`e:${p.form}:${id}`, g.ok); p.first[id] = g.ok; }
+      if (g.ok) { lockQ(el, "ok"); res.textContent = ""; }
+      else if (!first || BINARY.has(id)) { lockQ(el, "bad"); res.textContent = `Answer: ${id === "form" ? FORM_NAMES[p.form] : answerG(id, p)}`; }
+      else { retryQ(el, (g.blank ? null : diagnoseE(id, p, g.n)) || hintE(id, p)); open++; }
+    });
+    p.tries++;
+    if (first) { saveStats(); $("eEq").innerHTML = eqHTML(p, true); }
+    if (open === 0) {
+      p.done = true;
+      closeOut("eQs", p, stepsE, "eScore");
+      $("eLine").textContent = "Tap any question to see the steps.";
+      if (window.matchMedia("(max-width: 820px)").matches) window.scrollTo({ top: 0, behavior: "smooth" });
+    } else $("eLine").textContent = "Fix the ones marked ✗, then check again.";
+    syncUI();
+    requestAnimationFrame(resizeG);
+  }
+
+  // =====================================================================
+  // FIND a (zeroes plus the optimal value or one point)
+  // =====================================================================
+  function genFind(prev) {
+    const variant = Math.random() < 0.5 ? "opt" : "pt";
+    for (;;) {
+      const a = pick([1, 1, -1, -1, 2, -2, 3, -3, 0.5, -0.5]);
+      const r = ri(-7, 5), d = ri(1, 3), s = r + 2 * d, h = r + d, k = -a * d * d;
+      if (s > 8 || Math.abs(k) > 10 || !Number.isInteger(k)) continue;
+      let x0 = h, y0 = k;
+      if (variant === "pt") {
+        x0 = ri(r - 2, s + 2); y0 = a * (x0 - r) * (x0 - s);
+        if (x0 === r || x0 === s || x0 === h || Math.abs(x0) > 9 || Math.abs(y0) > 10 || !Number.isInteger(y0)) continue;
+      }
+      if (prev && prev.a === a && prev.r === r && prev.s === s) continue;
+      return { variant, a, r, s, h, k, c: a * r * s, zeros: [r, s], x0, y0 };
+    }
+  }
+  const findGiven = p => `<div class="given"><b>Zeroes</b> ${fmt(p.r)} and ${fmt(p.s)}</div><div class="given">${p.variant === "opt" ? `<b>Optimal value</b> ${fmt(p.k)}` : `<b>Passes through</b> (${fmt(p.x0)}, ${fmt(p.y0)})`}</div>`;
+
+  function newFind() {
+    const p = genFind(cur.f);
+    Object.assign(p, { tries: 0, done: false, sel: null, first: {} });
+    cur.f = p;
+    $("fNote").innerHTML = `${findGiven(p)}<span id="fLine">Find a in y = a(x ${MINUS} s)(x ${MINUS} t).</span>`;
+    const ids = p.variant === "opt" ? ["axis", "vertex", "a", "step"] : ["axis", "a", "vertex", "step"];
+    $("fQs").innerHTML = ids.map(id => (id === "a" ? row("a", "a value", `a = ${box("f-a", "a value")}`) : qHTML("f", id))).join("");
+    $("fScore").textContent = "";
+    hover = null;
+    syncUI();
+    drawG();
+  }
+
+  const F = {
+    list: "fQs", score: "fScore",
+    grade: (id, el, p) => numGrade(el, id === "axis" ? [p.h] : id === "a" ? [p.a] : id === "vertex" ? [p.h, p.k] : [p.a, 3 * p.a, 5 * p.a]),
+    answer: (id, p) => (id === "a" ? `a = ${fmt(p.a)}` : answerG(id, p)),
+    diag(id, p, n) {
+      if (id === "step") return diagStep(p, n);
+      if (n.some(Number.isNaN)) return id === "vertex" ? "Fill in both x and y." : null;
+      if (id === "axis") {
+        if (near(n[0], p.r) || near(n[0], p.s)) return "That is a zero. The axis is halfway between the two zeroes.";
+        if (p.h !== 0 && near(n[0], p.r + p.s)) return "Now divide the sum of the zeroes by 2.";
+        if (p.h !== 0 && near(n[0], -p.h)) return "Wrong sign.";
+      }
+      if (id === "a") {
+        const prod = (p.x0 - p.r) * (p.x0 - p.s);
+        if (near(n[0], -p.a)) return "Wrong sign. Check the signs inside the brackets.";
+        if (near(n[0], p.y0)) return "Divide both sides by the number beside a.";
+        if (near(n[0], prod)) return "That is the number beside a. Divide y by it.";
+        if (Math.abs(p.a) !== 1 && near(n[0], 1 / p.a)) return "Flip the division. It is y divided by the number beside a.";
+      }
+      if (id === "vertex") {
+        if (p.h !== p.k && near(n[0], p.k) && near(n[1], p.h)) return "x and y are swapped.";
+        if (near(n[0], p.h)) return p.variant === "opt" ? "x is right. y is the optimal value." : "x is right. Put it into your equation to get y.";
+        if (near(n[1], p.k)) return "y is right. x is the axis of symmetry.";
+      }
+      return null;
+    },
+    hint(id, p) {
+      if (id === "axis") return "It is halfway between the zeroes.";
+      if (id === "a") return p.variant === "opt"
+        ? `The vertex is on the parabola. Put it into y = a(x ${MINUS} s)(x ${MINUS} t) and solve for a.`
+        : `Put (${fmt(p.x0)}, ${fmt(p.y0)}) into y = a(x ${MINUS} s)(x ${MINUS} t) and solve for a.`;
+      if (id === "vertex") return p.variant === "opt" ? "x is the axis of symmetry. y is the optimal value." : "Put the x of the axis of symmetry into your equation to get y.";
+      return "Multiply 1, 3, 5 by a.";
+    },
+    steps(id, p) {
+      const sub = (x0, v) => (v === 0 ? fmt(x0) : `${fmt(x0)} ${v > 0 ? MINUS : "+"} ${abs(v)}`);
+      const v1 = p.x0 - p.r, v2 = p.x0 - p.s, eq = facStr(p.a, p.r, p.s);
+      if (id === "axis") return ["Halfway between the zeroes", `x = (${fmt(p.r)} + ${paren(p.s)}) ÷ 2 = ${fmt(p.h)}`];
+      if (id === "a") return [
+        `y = a${factor(p.r)}${factor(p.s)}`,
+        `Substitute ${p.variant === "opt" ? "the vertex " : ""}(${fmt(p.x0)}, ${fmt(p.y0)})`,
+        `${fmt(p.y0)} = a(${sub(p.x0, p.r)})(${sub(p.x0, p.s)})`,
+        `${fmt(p.y0)} = a(${fmt(v1)})(${fmt(v2)}) = ${v1 * v2 === 1 ? "" : v1 * v2 === -1 ? MINUS : fmt(v1 * v2)}a`,
+        `a = ${fmt(p.y0)} ÷ ${paren(v1 * v2)} = ${fmt(p.a)}`,
+        `y = ${eq}`];
+      if (id === "vertex") return p.variant === "opt"
+        ? [`x is the axis of symmetry: x = ${fmt(p.h)}`, `y is the optimal value: y = ${fmt(p.k)}`, `Vertex (${fmt(p.h)}, ${fmt(p.k)})`]
+        : [`Substitute x = ${fmt(p.h)} into y = ${eq}`, `y = ${paren(p.a)} × ${paren(p.h - p.r)} × ${paren(p.h - p.s)} = ${fmt(p.k)}`, `Vertex (${fmt(p.h)}, ${fmt(p.k)})`];
+      return [`a = ${fmt(p.a)}`, `${paren(p.a)} × (1, 3, 5) = ${stepList(p.a)}`];
+    },
+    done(p) { $("fNote").innerHTML = `${findGiven(p)}<div class="eq">y = ${facStr(p.a, p.r, p.s)}</div>Tap any question to see the steps.`; },
+    retry() { $("fLine").textContent = "Fix the ones marked ✗, then check again."; }
+  };
+
+  // =====================================================================
+  // WORD PROBLEM (height against time)
+  // =====================================================================
+  const W_CTX = [
+    "A ball is thrown up from the top of a building.",
+    "A stone is thrown up from a cliff.",
+    "A rocket is launched from a platform.",
+    "A firework is launched from a rooftop.",
+    "A bungee jumper leaps up off a tower, with no cord."
+  ];
+  // h = −5(t − gp)(t + q): it lands at t = gp, and the other zero is negative
+  const W_PAIRS = [[3, 1], [4, 2], [5, 1], [5, 3], [6, 2], [6, 4], [7, 1], [7, 3], [8, 2]];
+  function genWord(prev) {
+    for (;;) {
+      const [gp, q] = pick(W_PAIRS);
+      if (prev && prev.gp === gp && prev.q === q) continue;
+      return { gp, q, b: 5 * (gp - q), c: 5 * gp * q, tm: (gp - q) / 2, hm: 5 * ((gp + q) / 2) ** 2, ctx: pick(W_CTX) };
+    }
+  }
+  const wRhs = p => `${MINUS}5t² + ${p.b}t + ${p.c}`;
+
+  function newWord() {
+    const p = genWord(cur.w);
+    Object.assign(p, { tries: 0, done: false, sel: null, first: {} });
+    cur.w = p;
+    $("wNote").innerHTML = `<div class="eq">h = ${wRhs(p)}</div><span id="wLine">${p.ctx} h is the height in metres after t seconds.</span>`;
+    $("wQs").innerHTML = [
+      row("ground", "Hits the ground", `t = ${box("w-g", "Time it hits the ground")} s`),
+      row("start", "Starting height", `${box("w-s", "Starting height")} m`),
+      row("when", "Highest at", `t = ${box("w-t", "Time of the highest point")} s`),
+      row("max", "Maximum height", `${box("w-m", "Maximum height")} m`)
+    ].join("");
+    $("wScore").textContent = "";
+    hover = null;
+    syncUI();
+    drawG();
+  }
+
+  const W = {
+    list: "wQs", score: "wScore",
+    grade: (id, el, p) => numGrade(el, [id === "ground" ? p.gp : id === "start" ? p.c : id === "when" ? p.tm : p.hm]),
+    answer: (id, p) => (id === "ground" ? `t = ${p.gp} s` : id === "start" ? `${p.c} m` : id === "when" ? `t = ${p.tm} s` : `${p.hm} m`),
+    diag(id, p, n) {
+      const t = n[0];
+      if (Number.isNaN(t)) return null;
+      if (id === "ground") {
+        if (near(t, -p.q)) return "Time cannot be negative. Use the other zero.";
+        if (near(t, p.q) || near(t, -p.gp)) return "Check the signs. Each bracket must equal 0.";
+        if (near(t, p.c)) return "That is the starting height. On the ground h = 0.";
+      }
+      if (id === "start") {
+        if (near(t, p.hm)) return "That is the maximum height. The start is at t = 0.";
+        if (near(t, 0)) return "That is the time. What is h when t = 0?";
+        if (near(t, p.b)) return "Use the number with no t beside it.";
+      }
+      if (id === "when") {
+        if (near(t, p.hm)) return "That is the height. This box is the time.";
+        if (near(t, p.gp / 2)) return "Use both zeroes, including the negative one.";
+        if (near(t, p.gp)) return "That is when it lands. The highest point is at the vertex.";
+        if (near(t, (p.gp + p.q) / 2)) return "Add the zeroes with their signs, then divide by 2.";
+      }
+      if (id === "max") {
+        if (near(t, p.c)) return "That is the starting height. The maximum is at the vertex.";
+        if (near(t, p.tm)) return "That is the time. This box is the height.";
+      }
+      return null;
+    },
+    hint(id) {
+      if (id === "ground") return "On the ground h = 0. Factor, then find the zeroes.";
+      if (id === "start") return "At the start t = 0. Put t = 0 into the equation.";
+      if (id === "when") return "The highest point is the vertex. Its t is halfway between the zeroes.";
+      return "Put the time of the highest point into the equation.";
+    },
+    steps(id, p) {
+      if (id === "ground") return [
+        `On the ground h = 0, so 0 = ${wRhs(p)}`,
+        `Common factor ${MINUS}5: 0 = ${MINUS}5(t² ${MINUS} ${p.gp - p.q}t ${MINUS} ${p.gp * p.q})`,
+        `Product ${MINUS}${p.gp * p.q}, sum ${MINUS}${p.gp - p.q}: the numbers are ${MINUS}${p.gp} and ${p.q}`,
+        `0 = ${MINUS}5(t ${MINUS} ${p.gp})(t + ${p.q})`,
+        `t = ${p.gp} or t = ${MINUS}${p.q}`,
+        `Time cannot be negative, so t = ${p.gp} s`];
+      if (id === "start") return ["At the start t = 0", `h = ${MINUS}5(0)² + ${p.b}(0) + ${p.c}`, `h = ${p.c} m`];
+      if (id === "when") return [
+        `The zeroes are ${p.gp} and ${MINUS}${p.q}`,
+        `Halfway: t = (${p.gp} + (${MINUS}${p.q})) ÷ 2 = ${p.tm} s`,
+        `Check: t = ${MINUS}b ÷ 2a = ${MINUS}${p.b} ÷ (2 × (${MINUS}5)) = ${p.tm}`];
+      return [`Substitute t = ${p.tm}`, `h = ${MINUS}5(${p.tm})² + ${p.b}(${p.tm}) + ${p.c}`, `h = ${p.hm} m`];
+    },
+    done() { $("wLine").textContent = "Tap any question to see the steps."; },
+    retry() { $("wLine").textContent = "Fix the ones marked ✗, then check again."; }
+  };
+
+  function drawW() {
+    const v = VG, p = cur.w;
+    if (!v.W || !p) return;
+    const c = v.ctx;
+    c.clearRect(0, 0, v.W, v.H);
+    v.cv.style.cursor = "";
+    if (!p.done) return;
+    const padL = 30, padR = 30, padT = 34, padB = 36;
+    const x0 = -p.q - 0.7, x1 = p.gp + 0.9, y0 = -p.hm * 0.05, y1 = p.hm * 1.1;
+    v.sx = (v.W - padL - padR) / (x1 - x0);
+    v.sy = (v.H - padT - padB) / (y1 - y0);
+    v.ox = padL - x0 * v.sx;
+    v.oy = v.H - padB + y0 * v.sy;
+    const ys = [5, 10, 20, 25, 50].find(s => p.hm / s <= 7) || 50;
+    grid(v, 1, ys, 1, ys, 12, "t (s)", "h (m)");
+    const f = t => -5 * t * t + p.b * t + p.c;
+    const ink = css("--ink"), hl = css("--hl"), muted = css("--muted"), sel = p.sel, lfs = 14;
+    const gx = X(v, p.gp), g0 = Y(v, 0), sx0 = X(v, 0), sy0 = Y(v, p.c), mx = X(v, p.tm), my = Y(v, p.hm);
+    curve(v, f, muted, 2, 0.8, -p.q, 0, [5, 5]);
+    if (sel === "when") line(v, mx, my, mx, g0, hl, 3, [6, 5]);
+    if (sel === "max") line(v, sx0, my, mx, my, hl, 3, [6, 5]);
+    curve(v, f, css("--curve"), 3.5, 1, 0, p.gp);
+    dot(v, X(v, -p.q), g0, muted, 5);
+    label(v, "not valid", X(v, -p.q) + 8, g0 - 12, muted, "left", "bottom", 12);
+    if (sel === "start") halo(v, sx0, sy0);
+    dot(v, sx0, sy0, css("--c3"), 7);
+    label(v, `start (0, ${p.c})`, sx0 + 12, sy0 + 12, css("--c3"), "left", "top", lfs);
+    if (sel === "when" || sel === "max") halo(v, mx, my);
+    dot(v, mx, my, ink, 7);
+    label(v, `maximum (${p.tm}, ${p.hm})`, mx, my - 12, ink, "center", "bottom", lfs);
+    if (sel === "ground") halo(v, gx, g0);
+    dot(v, gx, g0, css("--c2"), 7);
+    label(v, `ground (${p.gp}, 0)`, gx - 10, g0 - 12, css("--c2"), "right", "bottom", lfs);
+  }
+
+  // =====================================================================
+  // DIFFERENCES
+  // =====================================================================
+  const KIND = { lin: "Linear", quad: "Quadratic", nei: "Neither" };
+  const diffs = a => a.slice(1).map((v, i) => v - a[i]);
+  const constant = a => a.every(v => v === a[0]);
+
+  function genDiff(kind, prev) {
+    for (;;) {
+      let f, x0;
+      if (kind === "lin") {
+        const m = pick([-6, -5, -4, -3, -2, -1, 1, 2, 3, 4, 5, 6]), b = ri(-9, 9);
+        f = x => m * x + b; x0 = ri(-2, 1);
+      } else if (kind === "quad") {
+        const a = pick([1, 1, -1, -1, 2, -2, 3, -3]), b = ri(-4, 4), c = ri(-6, 6);
+        f = x => a * x * x + b * x + c; x0 = ri(-2, 1);
+      } else {
+        const t = pick(["cubic", "exp", "exp", "abs"]);
+        if (t === "cubic") {
+          const a = pick([1, -1]), c = ri(-3, 3);
+          f = x => a * x * x * x + c; x0 = pick([-2, -1]);
+        } else if (t === "exp") {
+          const base = pick([2, 2, 3]), c = pick([0, 0, 1, -1]);
+          f = x => Math.pow(base, x) + c; x0 = 0;
+        } else {
+          x0 = ri(-2, 1);
+          const m = pick([1, 2, 3, -1, -2]), q = x0 + ri(1, 3), c = ri(-4, 4);
+          f = x => m * Math.abs(x - q) + c;
+        }
+      }
+      const xs = [0, 1, 2, 3, 4].map(i => x0 + i), ys = xs.map(f);
+      const d1 = diffs(ys), d2 = diffs(d1);
+      const c1 = constant(d1), c2 = constant(d2);
+      if (kind === "lin" ? !c1 : kind === "quad" ? (c1 || !c2) : (c1 || c2)) continue;
+      if (ys.some(y => Math.abs(y) > (kind === "nei" ? 90 : 50))) continue;
+      if (prev && prev.ys && prev.ys.join() === ys.join()) continue;
+      return { kind, xs, ys, d1, d2, f };
+    }
+  }
+
+  let lastKinds = [];
+  function pickKind() {
+    const WT = [1, 1.5, 0.8, 0.3];
+    const kinds = ["lin", "quad", "nei"];
+    const w = kinds.map(k => WT[level(`d:${k}`)] * (lastKinds.length >= 2 && lastKinds.every(x => x === k) ? 0.15 : 1));
+    let t = Math.random() * w.reduce((u, v) => u + v, 0);
+    for (let i = 0; i < kinds.length; i++) { t -= w[i]; if (t <= 0) return kinds[i]; }
+    return kinds[2];
+  }
+
+  function newTable() {
+    const kind = pickKind();
+    lastKinds = [...lastKinds, kind].slice(-2);
+    const p = genDiff(kind, cur.d);
+    Object.assign(p, { given: "table", tries: 0, done: false, sel: null, first: {} });
+    cur.d = p;
+    const col = (cls, head, cells) => `<div class="dcol ${cls}"><div class="dh">${head}</div>${cells.join("")}</div>`;
+    const cell = (c, i) => `<div class="dd"><input type="text" class="num" id="d${c}-${i}" data-c="${c}" data-i="${i}" aria-label="${c === 1 ? "First" : "Second"} difference ${i + 1}" autocomplete="off" spellcheck="false"></div>`;
+    $("dt").innerHTML =
+      col("dx", "x", p.xs.map(x => `<div class="dc">${fmt(x)}</div>`)) +
+      col("dy", "y", p.ys.map(y => `<div class="dc">${fmt(y)}</div>`)) +
+      col("d1", "First<br>differences", p.d1.map((_, i) => cell(1, i))) +
+      col("d2", "Second<br>differences", p.d2.map((_, i) => cell(2, i)));
+    $("dQs").innerHTML = [
+      row("d1", "First differences", "", "k1"),
+      row("d2", "Second differences", "", "k2"),
+      row("type", "Type", segMini("d-type", [["lin", "Linear"], ["quad", "Quadratic"], ["nei", "Neither"]])),
+      row("opens", "If quadratic, opens", segMini("d-opens", [["up", "Up"], ["down", "Down"]]))
+    ].join("");
+    showGiven("table");
+    syncUI();
+  }
+
+  const cellInputs = c => qsa(`#dt input[data-c="${c}"]`);
+
+  function hintD1(v, p) {
+    if (v.every(Number.isNaN)) return "Subtract down the y column: each y minus the y above it.";
+    const filled = v.filter(t => !Number.isNaN(t));
+    if (p.d1.some(d => d !== 0) && filled.length === v.length && v.every((t, i) => near(t, -p.d1[i]))) return "Signs are flipped. Do the y below minus the y above.";
+    return "Fix the red boxes. Each one is the y below minus the y above.";
+  }
+  function hintD2(v, v1, all1, blank, p) {
+    if (blank) return "The first differences are not all the same. Work out the second differences.";
+    if (!all1) {
+      let seen = 0, match = true;
+      v.forEach((t, i) => {
+        if (Number.isNaN(t) || Number.isNaN(v1[i]) || Number.isNaN(v1[i + 1])) return;
+        seen++;
+        if (!near(t, v1[i + 1] - v1[i])) match = false;
+      });
+      if (seen && match) return "These follow from your first differences. Fix those, then redo these.";
+    }
+    if (p.d2.some(d => d !== 0) && v.every((t, i) => near(t, -p.d2[i]))) return "Signs are flipped. Do the difference below minus the one above.";
+    return "Fix the red boxes. Each one is the first difference below minus the one above.";
+  }
+  function hintType(ch, kind) {
+    if (!ch) return "Linear: first differences all the same. Quadratic: second differences all the same.";
+    if (ch === "lin") return "Linear needs every first difference to be the same. Check yours.";
+    if (ch === "quad") return kind === "lin" ? "The first differences are already all the same. What does that tell you?" : "Quadratic needs every second difference to be the same. Check yours.";
+    return kind === "lin" ? "Look at the first differences. Are they all the same?" : "Look at the second differences. Are they all the same?";
+  }
+
+  function stepsD(id, p) {
+    const list = a => a.map(fmt).join(", ");
+    if (id === "d1") return p.d1.map((d, i) => `${fmt(p.ys[i + 1])} ${MINUS} ${paren(p.ys[i])} = ${fmt(d)}`);
+    if (id === "d2") return p.d2.map((d, i) => `${fmt(p.d1[i + 1])} ${MINUS} ${paren(p.d1[i])} = ${fmt(d)}`);
+    if (id === "opens") return p.kind !== "quad"
+      ? ["Only a parabola opens up or down", `This relation is ${p.kind === "lin" ? "linear" : "neither"}`]
+      : [`The second differences are ${fmt(p.d2[0])}`, `That is ${p.d2[0] > 0 ? "positive" : "negative"}, so a is ${p.d2[0] > 0 ? "positive" : "negative"} and it opens ${p.d2[0] > 0 ? "up" : "down"}`, `The vertex is a ${p.d2[0] > 0 ? "minimum" : "maximum"}`];
+    if (p.kind === "lin") return [`First differences: ${list(p.d1)}`, "All the same, so it is linear", "The points make a straight line"];
+    const s = [`First differences: ${list(p.d1)} (not all the same)`, `Second differences: ${list(p.d2)}`];
+    if (p.kind === "quad") s.push("All the same, so it is quadratic", "The points make a parabola");
+    else s.push("Not all the same either, so it is neither", "The points make neither a line nor a parabola");
+    return s;
+  }
+
+  function checkD() {
+    const p = cur.d;
+    if (!p || p.done) return;
+    const first = p.tries === 0;
+    const rows = {};
+    qsa("#dQs .q").forEach(el => { rows[el.dataset.id] = el; });
+    const in1 = cellInputs(1), in2 = cellInputs(2);
+    const v1 = in1.map(i => parseNum(i.value)), v2 = in2.map(i => parseNum(i.value));
+    const ok1 = v1.map((t, i) => near(t, p.d1[i])), ok2 = v2.map((t, i) => near(t, p.d2[i]));
+    const all1 = ok1.every(Boolean), all2 = ok2.every(Boolean);
+    const blank2 = in2.every(i => i.value.trim() === "");
+    const need2 = p.kind !== "lin";
+    const chosen = rows.type.querySelector("input:checked");
+    const ch = chosen ? chosen.value : null;
+    const tOK = ch === p.kind;
+    // the opening direction only counts for a quadratic, and is marked at the end so it cannot give the type away
+    const needO = p.kind === "quad", oWant = p.d2[0] > 0 ? "up" : "down";
+    const oOK = () => { const c = rows.opens.querySelector("input:checked"); return !!c && c.value === oWant; };
+    if (first) {
+      record("d:d1", all1); p.first.d1 = all1;
+      if (need2) { record("d:d2", all2); p.first.d2 = all2; } else p.first.d2 = blank2 || all2;
+      record(`d:${p.kind}`, tOK); p.first.type = tOK;
+      if (needO) record("d:opens", oOK());
+      p.first.opens = needO ? oOK() : true;
+      saveStats();
+    }
+    const paint = (ins, oks, ans) => ins.forEach((inp, i) => {
+      if (inp.disabled) return;
+      inp.classList.remove("bad", "good");
+      if (oks[i]) { inp.value = fmt(ans[i]); inp.classList.add("good"); inp.disabled = true; }
+      else if (first) inp.classList.add("bad");
+      else { inp.value = fmt(ans[i]); inp.classList.add("bad"); inp.disabled = true; }
+    });
+    let open = 0;
+    if (!rows.d1.dataset.state) {
+      paint(in1, ok1, p.d1);
+      if (all1) { lockQ(rows.d1, "ok"); rows.d1.querySelector(".res").textContent = ""; }
+      else if (!first) { lockQ(rows.d1, "bad"); rows.d1.querySelector(".res").textContent = "Corrected in the table."; }
+      else { retryQ(rows.d1, hintD1(v1, p)); open++; }
+    }
+    if (!rows.d2.dataset.state && !(blank2 && !need2)) {
+      paint(in2, ok2, p.d2);
+      if (all2) { lockQ(rows.d2, "ok"); rows.d2.querySelector(".res").textContent = ""; }
+      else if (!first) { lockQ(rows.d2, "bad"); rows.d2.querySelector(".res").textContent = "Corrected in the table."; }
+      else { retryQ(rows.d2, hintD2(v2, v1, all1, blank2, p)); open++; }
+    }
+    if (!rows.type.dataset.state) {
+      if (tOK) { lockQ(rows.type, "ok"); rows.type.querySelector(".res").textContent = ""; }
+      else if (!first) { lockQ(rows.type, "bad"); rows.type.querySelector(".res").textContent = `Answer: ${KIND[p.kind]}`; }
+      else { retryQ(rows.type, hintType(ch, p.kind)); open++; }
+    }
+    p.tries++;
+    if (open === 0) {
+      p.done = true;
+      if (!rows.d2.dataset.state) {
+        // a linear table never needed the second column
+        lockQ(rows.d2, "ok");
+        rows.d2.querySelector(".mark").textContent = "";
+        rows.d2.querySelector(".res").textContent = "Not needed. The first differences are already the same.";
+        in2.forEach(i => { i.value = "0"; i.disabled = true; i.classList.remove("bad"); i.classList.add("ghost"); });
+      }
+      if (needO) {
+        const good = oOK();
+        lockQ(rows.opens, good ? "ok" : "bad");
+        if (!good) rows.opens.querySelector(".res").textContent = `Answer: ${oWant === "up" ? "Up" : "Down"}`;
+      } else {
+        qsa("input", rows.opens).forEach(i => { i.checked = false; });
+        lockQ(rows.opens, "ok");
+        rows.opens.querySelector(".mark").textContent = "";
+        rows.opens.querySelector(".res").textContent = "Not needed. Only a parabola opens up or down.";
+      }
+      closeOut("dQs", p, stepsD, "dScore");
+      $("dNote").textContent = "Tap any row to see the steps.";
+      $("plot").hidden = false;
+      if (window.matchMedia("(max-width: 820px)").matches) window.scrollTo({ top: 0, behavior: "smooth" });
+    } else $("dNote").textContent = "Fix the ones marked ✗, then check again.";
+    syncUI();
+    requestAnimationFrame(resizeD);
+  }
+
+  function resizeD() { sizeView(VD); drawD(); }
+
+  function drawD() {
+    const v = VD, p = cur.d;
+    if (!v.W || !p) return;
+    if (p.given === "table") {
+      if (!p.done) return;
+      v.ctx.clearRect(0, 0, v.W, v.H);
+      const pad = 30;
+      const x0 = Math.min(0, p.xs[0]) - 0.5, x1 = Math.max(0, p.xs[p.xs.length - 1]) + 0.5;
+      let y0 = Math.min(0, ...p.ys), y1 = Math.max(0, ...p.ys);
+      const span = Math.max(1, y1 - y0);
+      y0 -= span * 0.06; y1 += span * 0.06;
+      v.sx = (v.W - 2 * pad) / (x1 - x0);
+      v.sy = (v.H - 2 * pad) / (y1 - y0);
+      v.ox = pad - x0 * v.sx;
+      v.oy = v.H - pad + y0 * v.sy;
+      const ys = [1, 2, 5, 10, 20, 50].find(s => span / s <= 8) || 100;
+      grid(v, 1, ys, 1, ys, 12);
+      curve(v, p.f, css("--c1"), 2.5, 0.6);
+      p.xs.forEach((x, i) => dot(v, X(v, x), Y(v, p.ys[i]), css("--ink"), 6));
+      return;
+    }
+    // an equation shows its graph once he is done; a shape question shows it from the start
+    if (p.given === "eq" && !p.done) return;
+    v.ctx.clearRect(0, 0, v.W, v.H);
+    const tall = p.given === "eq" ? 2 : 1;
+    v.sx = v.W / 14; v.sy = v.H / (14 * tall);
+    v.ox = v.W / 2; v.oy = v.H / 2;
+    grid(v, 1, tall, 2, 2 * tall, 11);
+    curve(v, p.f, css("--curve"), 3);
+  }
+
+  // ---------- classify from an equation: the degree ----------
+  const SUP = ["", "", "²", "³", "⁴", "⁵", "⁶"];
+  const polyMul = (A, B) => {
+    const R = Array(A.length + B.length - 1).fill(0);
+    A.forEach((a, i) => B.forEach((b, j) => { R[i + j] += a * b; }));
+    return R;
+  };
+  // terms are [coefficient, exponent] pairs, written in the order given
+  function termsStr(terms) {
+    let out = "";
+    terms.forEach(([c, e], i) => {
+      const mag = Math.abs(c), body = (mag === 1 && e > 0 ? "" : String(mag)) + (e > 0 ? "x" + SUP[e] : "");
+      out += i === 0 ? (c < 0 ? MINUS : "") + body : ` ${c < 0 ? MINUS : "+"} ${body}`;
+    });
+    return out;
+  }
+  const polyTerms = P => P.map((c, e) => [c, e]).filter(t => t[0] !== 0).reverse();
+  const polyFn = P => x => P.reduce((sum, c, e) => sum + c * Math.pow(x, e), 0);
+
+  function genDegree(prev) {
+    const t = Math.random();
+    for (;;) {
+      let text, P, brackets = false, lead, firstExp;
+      if (t < 0.45) {
+        const deg = pick([1, 1, 2, 2, 2, 3, 4, 5, 6]);
+        const terms = [[pick([1, 1, 1, 2, 3, 4, 8, -1]), deg]];
+        const lower = [];
+        for (let e = deg - 1; e >= 0; e--) if (Math.random() < (deg <= 2 ? 0.7 : 0.35)) lower.push([pick([1, 2, 3, 4, 5, -1, -2, -3]), e]);
+        if (!lower.length && deg === 1) lower.push([pick([-5, -3, 1, 2, 7]), 0]);
+        terms.push(...lower.slice(0, 2));
+        // half the time the highest exponent is not written first
+        if (terms.length > 1 && Math.random() < 0.5) terms.push(terms.shift());
+        if (terms[0][0] < 0 && terms.length > 1 && terms[1][0] > 0) [terms[0], terms[1]] = [terms[1], terms[0]];
+        text = termsStr(terms);
+        P = Array(deg + 1).fill(0);
+        terms.forEach(([c, e]) => { P[e] += c; });
+        lead = terms.find(x => x[1] === deg)[0]; firstExp = terms[0][1];
+      } else {
+        brackets = true;
+        const r = pick([-5, -4, -3, -2, -1, 1, 2, 3, 4, 5]), s = pick([-5, -4, -3, -2, -1, 1, 2, 3, 4, 5]), a = pick([1, 1, 2, 3, -1, -2]);
+        if (t < 0.65) { text = facStr(a, r, s); P = polyMul([a], polyMul([-r, 1], [-s, 1])); }
+        else if (t < 0.75) { if (r === s) continue; text = `x${factor(r)}${factor(s)}`; P = polyMul([0, 1], polyMul([-r, 1], [-s, 1])); }
+        else if (t < 0.9) { text = vtxStr(a, r, s); P = polyMul([a], polyMul([-r, 1], [-r, 1])); P[0] += s; }
+        else { if (a === 1 || a === -1) continue; text = `${a < 0 ? MINUS : ""}${Math.abs(a)}${factor(r)}`; P = polyMul([a], [-r, 1]); }
+        lead = P[P.length - 1]; firstExp = P.length - 1;
+      }
+      const deg = P.length - 1;
+      if (P[deg] === 0 || (prev && prev.text === text)) continue;
+      return { given: "eq", text, P, deg, brackets, lead, firstExp, kind: deg === 1 ? "lin" : deg === 2 ? "quad" : "nei", f: polyFn(P), expanded: termsStr(polyTerms(P)) };
+    }
+  }
+
+  const KIND_OPTS = [["lin", "Linear"], ["quad", "Quadratic"], ["nei", "Neither"]];
+  function showGiven(given) {
+    $("dt").hidden = given !== "table";
+    $("dEq").hidden = given !== "eq";
+    $("plot").hidden = given !== "graph";
+    $("dNote").textContent = "";
+    $("dScore").textContent = "";
+  }
+  const dRetry = () => { $("dNote").textContent = "Fix the ones marked ✗, then check again."; };
+
+  function newDegree() {
+    const p = genDegree(cur.d);
+    Object.assign(p, { tries: 0, done: false, sel: null, first: {} });
+    cur.d = p;
+    $("dEq").textContent = `y = ${p.text}`;
+    $("dQs").innerHTML = row("degree", "Degree", box("d-deg", "Degree")) + row("eqtype", "Type", segMini("d-etype", KIND_OPTS));
+    showGiven("eq");
+    syncUI();
+  }
+  const DEG = {
+    list: "dQs", score: "dScore",
+    grade: (id, el, p) => (id === "degree" ? numGrade(el, [p.deg]) : radGrade(el, p.kind)),
+    answer: (id, p) => (id === "degree" ? String(p.deg) : KIND[p.kind]),
+    diag(id, p, n) {
+      if (id !== "degree" || Number.isNaN(n[0])) return null;
+      if (p.brackets && p.deg > 1 && near(n[0], 1)) return "Each bracket has an x. Expand first, then find the highest exponent.";
+      if (Math.abs(p.lead) !== p.deg && near(n[0], Math.abs(p.lead))) return "That is a coefficient. The degree is an exponent.";
+      if (p.firstExp !== p.deg && near(n[0], p.firstExp)) return "Check every term. The highest exponent is not always written first.";
+      return null;
+    },
+    hint: (id, p) => (id === "degree" ? (p.brackets ? "Expand the brackets, then find the highest exponent." : "Find the highest exponent on x.") : "Degree 1 is linear. Degree 2 is quadratic. Any other degree is neither."),
+    steps(id, p) {
+      if (id === "degree") return p.brackets
+        ? [`Expand: y = ${p.expanded}`, `The highest exponent is ${p.deg}${p.deg === 1 ? " (x means x¹)" : ""}`]
+        : ["Look at the exponent on each x", `The highest exponent is ${p.deg}${p.deg === 1 ? " (x means x¹)" : ""}`];
+      return [`The degree is ${p.deg}`,
+        p.deg === 1 ? "Degree 1 means linear" : p.deg === 2 ? "Degree 2 means quadratic" : `Degree ${p.deg} is not 1 or 2, so it is neither`,
+        p.deg === 1 ? "Its graph is a straight line" : p.deg === 2 ? "Its graph is a parabola" : "Its graph is not a line and not a parabola"];
+    },
+    done() { $("dNote").textContent = "Tap any row to see the steps."; $("plot").hidden = false; },
+    retry: dRetry
+  };
+
+  // ---------- classify from a graph: the shape ----------
+  function genShape(prev) {
+    const kind = pick(["lin", "quad", "quad", "nei", "nei"]);
+    for (;;) {
+      const h = ri(-3, 3), k = ri(-3, 3), sg = pick([1, -1]);
+      let f, shape = kind;
+      if (kind === "lin") { const m = sg * pick([0.5, 1, 2, 3]); f = x => m * x + k; }
+      else if (kind === "quad") { const a = sg * pick([0.5, 1, 2]); f = x => a * (x - h) * (x - h) + k; }
+      else {
+        shape = pick(["cubic", "vee", "exp"]);
+        if (shape === "cubic") f = x => sg * 0.5 * Math.pow(x - h, 3) + k;
+        else if (shape === "vee") { const m = sg * pick([1, 2]); f = x => m * Math.abs(x - h) + k; }
+        else f = x => sg * Math.pow(2, x - h) + k;
+      }
+      const sig = `${shape}${sg}${h}${k}`;
+      if (prev && prev.sig === sig) continue;
+      return { given: "graph", kind, shape, f, sig };
+    }
+  }
+  function newShape() {
+    const p = genShape(cur.d);
+    Object.assign(p, { tries: 0, done: false, sel: null, first: {} });
+    cur.d = p;
+    $("dQs").innerHTML = row("gtype", "Type", segMini("d-gtype", KIND_OPTS));
+    showGiven("graph");
+    syncUI();
+    requestAnimationFrame(resizeD);
+  }
+  const SHAPE = {
+    list: "dQs", score: "dScore",
+    grade: (id, el, p) => radGrade(el, p.kind),
+    answer: (id, p) => KIND[p.kind],
+    diag: () => null,
+    hint: () => "A straight line is linear. A parabola is quadratic. Any other shape is neither.",
+    steps(id, p) {
+      if (p.kind === "lin") return ["The graph is one straight line", "A line is the shape of a linear relation"];
+      if (p.kind === "quad") return ["The graph is a smooth U shape with one turning point: a parabola", "A parabola is the shape of a quadratic relation"];
+      return [p.shape === "cubic" ? "The curve bends two ways, so it is not a parabola" : p.shape === "vee" ? "It has a sharp corner, so it is not a parabola, and it is not one straight line" : "It has no turning point: flat on one side and steep on the other",
+        "Not a line and not a parabola, so it is neither"];
+    },
+    done() { $("dNote").textContent = "Tap the row to see why."; },
+    retry: dRetry
+  };
+
+  // table of values, equation or graph: her three ways to tell
+  let lastGiven = [];
+  function newDiff() {
+    const r = Math.random();
+    let given = r < 0.5 ? "table" : r < 0.8 ? "eq" : "graph";
+    if (lastGiven.length >= 2 && lastGiven.every(g => g === given)) given = given === "table" ? "eq" : "table";
+    lastGiven = [...lastGiven, given].slice(-2);
+    if (given === "table") newTable(); else if (given === "eq") newDegree(); else newShape();
+  }
+
+  // =====================================================================
+  // THINK (reasoning from the properties, the way she sketches it)
+  // =====================================================================
+  function genThink(prev) {
+    const type = pick(["pts", "sign", "count"].filter(t => !prev || t !== prev.type));
+    for (;;) {
+      const up = Math.random() < 0.5, clue = pick(["diff", "diff", "a", "opens"]);
+      let p;
+      if (type === "pts") {
+        const d = ri(2, 6), h = ri(-9 + d, 9 - d), a = pick([1, 0.5, 0.25]) * (up ? 1 : -1), k = ri(-8, 8), y0 = k + a * d * d;
+        if (!Number.isInteger(y0) || Math.abs(y0) > 9 || h === 0) continue;
+        p = { type, a, h, k, d, y0, x1: h - d, x2: h + d, up };
+      } else if (type === "sign") {
+        const r = ri(-8, 6), w = ri(2, 8), s = r + w;
+        if (s > 8) continue;
+        const half = w / 2, a = (up ? 1 : -1) * Math.min(1, 6 / (half * half));
+        p = { type, a, h: (r + s) / 2, k: -a * half * half, r, s, up, clue };
+      } else {
+        const sign = pick([-1, -1, 1, 1, 0]), k = sign * ri(2, 5);
+        p = { type, a: (up ? 1 : -1) * 0.5, h: ri(-5, 5), k, up, clue, sign, count: k === 0 ? 1 : (k < 0) === up ? 2 : 0 };
+      }
+      return p;
+    }
+  }
+  const clueText = p => (p.clue === "diff" ? `The second differences are ${p.up ? "positive" : "negative"}.` : p.clue === "a" ? `a is ${p.up ? "positive" : "negative"}.` : `It opens ${p.up ? "up" : "down"}.`);
+  const dirLine = p => (p.clue === "diff" ? `Second differences ${p.up ? "positive" : "negative"} means a is ${p.up ? "positive" : "negative"}, so it opens ${p.up ? "up" : "down"}`
+    : p.clue === "a" ? `a is ${p.up ? "positive" : "negative"}, so it opens ${p.up ? "up" : "down"}` : `It opens ${p.up ? "up" : "down"}`);
+
+  function newThink() {
+    const p = genThink(cur.t);
+    Object.assign(p, { tries: 0, done: false, sel: null, first: {} });
+    cur.t = p;
+    const line = `<span id="tLine"></span>`;
+    if (p.type === "pts") {
+      $("tNote").innerHTML = `<div class="given"><b>Points</b> (${fmt(p.x1)}, ${fmt(p.y0)}) and (${fmt(p.x2)}, ${fmt(p.y0)})</div><div class="given">Both are on the same parabola.</div>${line}`;
+      $("tQs").innerHTML = qHTML("t", "axis");
+    } else if (p.type === "sign") {
+      $("tNote").innerHTML = `<div class="given"><b>Zeroes</b> ${fmt(p.r)} and ${fmt(p.s)}</div><div class="given">${clueText(p)}</div>${line}`;
+      $("tQs").innerHTML = row("minmax", "Vertex is a", segMini("t-minmax", [["min", "Minimum"], ["max", "Maximum"]])) +
+        row("optsign", "Optimal value is", segMini("t-optsign", [["pos", "Positive"], ["neg", "Negative"]]));
+    } else {
+      $("tNote").innerHTML = `<div class="given"><b>Optimal value</b> is ${p.sign < 0 ? "negative" : p.sign > 0 ? "positive" : "0"}.</div><div class="given">${clueText(p)}</div>${line}`;
+      $("tQs").innerHTML = row("count", "Number of zeroes", segMini("t-count", [["0", "0"], ["1", "1"], ["2", "2"]]));
+    }
+    $("tScore").textContent = "";
+    hover = null;
+    syncUI();
+    drawG();
+  }
+
+  const T = {
+    list: "tQs", score: "tScore", binary: new Set(["minmax", "optsign"]),
+    grade: (id, el, p) => (id === "axis" ? numGrade(el, [p.h]) : radGrade(el, id === "minmax" ? (p.up ? "min" : "max") : id === "optsign" ? (p.up ? "neg" : "pos") : String(p.count))),
+    answer: (id, p) => (id === "axis" ? `x = ${fmt(p.h)}` : id === "minmax" ? (p.up ? "Minimum" : "Maximum") : id === "optsign" ? (p.up ? "Negative" : "Positive") : String(p.count)),
+    diag(id, p, n) {
+      if (id !== "axis" || Number.isNaN(n[0])) return null;
+      if (near(n[0], p.y0) && p.y0 !== p.h) return "That is the y value. Use the two x values.";
+      if (near(n[0], p.x1 + p.x2)) return "Now divide by 2.";
+      if (near(n[0], p.x1) || near(n[0], p.x2)) return "That is one of the points. The axis is halfway between them.";
+      if (near(n[0], p.d) || near(n[0], -p.d) || near(n[0], 2 * p.d)) return "Add the two x values, then divide by 2. Do not subtract.";
+      if (near(n[0], -p.h)) return "Wrong sign.";
+      return null;
+    },
+    hint: id => (id === "axis" ? "The points are at the same height, so the axis is halfway between them." : "Picture the vertex above or below the x axis, then open it the right way. Does it reach the x axis?"),
+    steps(id, p) {
+      const dir = p.up ? "up" : "down";
+      if (id === "axis") return [`Both points have y = ${fmt(p.y0)}, so they are mirror images`, `x = (${fmt(p.x1)} + ${paren(p.x2)}) ÷ 2`, `x = ${fmt(p.h)}`];
+      if (id === "minmax") return [dirLine(p), `The vertex is the ${p.up ? "lowest" : "highest"} point: a ${p.up ? "minimum" : "maximum"}`];
+      if (id === "optsign") return [`It crosses the x axis at ${fmt(p.r)} and ${fmt(p.s)}`, `It opens ${dir}, so between the zeroes the curve is ${p.up ? "below" : "above"} the x axis`, `The optimal value is ${p.up ? "negative" : "positive"}`];
+      const where = p.k === 0 ? "The optimal value is 0, so the vertex is on the x axis" : `The optimal value is ${p.k < 0 ? "negative" : "positive"}, so the vertex is ${p.k < 0 ? "below" : "above"} the x axis`;
+      const end = p.count === 2 ? `Opening ${dir} from there, it crosses the x axis twice: 2 zeroes`
+        : p.count === 0 ? `Opening ${dir} from there, it never reaches the x axis: no zeroes` : "It touches the x axis only at the vertex: 1 zero";
+      return [dirLine(p), where, end];
+    },
+    done() { $("tLine").textContent = "Tap any question to see the steps."; },
+    retry() { $("tLine").textContent = "Fix the ones marked ✗, then check again."; }
+  };
+
+  function drawT() {
+    const v = VG, p = cur.t;
+    if (!v.W || !p) return;
+    v.sx = v.sy = Math.min(v.W, v.H) / 21;
+    v.ox = v.W / 2; v.oy = v.H / 2;
+    const c = v.ctx;
+    c.clearRect(0, 0, v.W, v.H);
+    v.cv.style.cursor = "";
+    const fs = Math.max(10, Math.min(14, v.sx * 0.5)), lfs = fs + 2;
+    grid(v, 1, 1, 2, 2, fs);
+    const ink = css("--ink"), hl = css("--hl"), red = css("--c2"), blue = css("--c1");
+    const f = x => p.a * (x - p.h) * (x - p.h) + p.k;
+    const vx = X(v, p.h), vy = Y(v, p.k), s = p.a > 0 ? 1 : -1;
+    if (p.done) {
+      line(v, vx, 0, vx, v.H, p.type === "pts" ? hl : ink, p.type === "pts" ? 4 : 1.5, p.type === "pts" ? [8, 6] : [4, 5], p.type === "pts" ? 1 : 0.45);
+      curve(v, f, css("--curve"), 3.5);
+    }
+    if (p.type === "pts") {
+      line(v, X(v, p.x1), Y(v, p.y0), X(v, p.x2), Y(v, p.y0), blue, 2, [5, 5], 0.6);
+      [p.x1, p.x2].forEach((x, i) => {
+        dot(v, X(v, x), Y(v, p.y0), blue, 7);
+        label(v, `(${fmt(x)}, ${fmt(p.y0)})`, X(v, x) + (i === 0 ? -12 : 12), Y(v, p.y0), blue, i === 0 ? "right" : "left", "middle", lfs);
+      });
+      if (p.done) label(v, `x = ${fmt(p.h)}`, vx + 8, v.H - 8, hl, "left", "bottom", lfs);
+      return;
+    }
+    if (p.type === "sign") {
+      [p.r, p.s].forEach((z, i) => {
+        dot(v, X(v, z), Y(v, 0), red, 7);
+        label(v, `(${fmt(z)}, 0)`, X(v, z) + (i === 0 ? -10 : 10), Y(v, 0) + (p.done ? s * 12 : 12), red, i === 0 ? "right" : "left", !p.done || s > 0 ? "top" : "bottom", lfs);
+      });
+      if (p.done) {
+        halo(v, vx, vy);
+        dot(v, vx, vy, ink, 7);
+        label(v, `${p.up ? "minimum" : "maximum"}, ${p.up ? "negative" : "positive"}`, vx, vy + s * 14, ink, "center", s > 0 ? "top" : "bottom", lfs);
+      }
+      return;
+    }
+    if (p.done && p.count === 2) {
+      const dz = Math.sqrt(-p.k / p.a);
+      [p.h - dz, p.h + dz].forEach(z => { halo(v, X(v, z), Y(v, 0)); dot(v, X(v, z), Y(v, 0), red, 7); });
+    }
+    if (p.done && p.count === 1) halo(v, vx, vy);
+    dot(v, vx, vy, p.done && p.count === 1 ? red : ink, 7);
+    label(v, p.done ? (p.count === 0 ? "no zeroes" : p.count === 1 ? "1 zero" : "2 zeroes") : "vertex", vx + 12, vy + s * 12, p.done ? red : ink, "left", s > 0 ? "top" : "bottom", lfs);
+  }
+
+  // =====================================================================
+  // shared wiring
+  // =====================================================================
+  const MODES = ["e", "g", "d", "f", "w", "t"];
+  const NEW = { e: newEq, g: newGraph, d: newDiff, f: newFind, w: newWord, t: newThink };
+  const CHECK = {
+    e: checkE, g: checkG, f: () => checkList("f", F), w: () => checkList("w", W), t: () => checkList("t", T),
+    d: () => (cur.d.given === "table" ? checkD() : checkList("d", cur.d.given === "eq" ? DEG : SHAPE))
+  };
+  const appEl = document.querySelector(".app");
+  function syncUI() {
+    const p = cur[mode];
+    if (!p) return;
+    const veiled = (mode === "e" || mode === "w") && !p.done;
+    $("bCheck").hidden = p.done;
+    $("bCheck").textContent = p.tries ? "Check again" : "Check";
+    $("bNew").textContent = p.done ? "Next one" : "New";
+    $("bNew").classList.toggle("primary", p.done);
+    $("eFocus").hidden = mode !== "e";
+    $("veil").hidden = !veiled;
+    appEl.classList.toggle("hide-stage", veiled);
+    $("warn").textContent = "";
+    renderProgress();
+  }
+  function setMode(m) {
+    mode = m;
+    $("gWrap").hidden = m === "d";
+    $("dWrap").hidden = m !== "d";
+    MODES.forEach(k => { $(`${k}Body`).hidden = k !== m; });
+    hover = null;
+    if (!cur[m]) NEW[m]();
+    else syncUI();
+    requestAnimationFrame(() => { resizeG(); resizeD(); });
+  }
+
+  MODES.forEach(k => $(`m${k.toUpperCase()}`).addEventListener("change", () => setMode(k)));
+  $("bCheck").addEventListener("click", () => CHECK[mode]());
+  // a question he has started has to be checked before moving on
+  const started = () => {
+    const p = cur[mode];
+    if (!p || p.done) return false;
+    if (p.tries) return true;
+    const scope = mode === "d" ? "#dt input, #dQs input" : `#${mode}Qs input`;
+    return qsa(scope).some(i => (i.type === "text" ? i.value.trim() !== "" : i.checked));
+  };
+  $("bNew").addEventListener("click", () => {
+    if (started()) { $("warn").textContent = "Check your answers first."; return; }
+    NEW[mode]();
+  });
+  $("eFocus").addEventListener("change", newEq);
+  document.addEventListener("keydown", e => {
+    if (e.key === "Enter" && e.target.matches && e.target.matches("input.num")) CHECK[mode]();
+  });
+  $("gQs").addEventListener("change", e => {
+    if (e.target.id !== "g-none") return;
+    ["g-r1", "g-r2"].forEach(id => {
+      const i = $(id);
+      i.disabled = e.target.checked;
+      if (e.target.checked) i.value = "";
+    });
+  });
+  MODES.forEach(k => $(`${k}Qs`).addEventListener("click", e => {
+    const el = e.target.closest(".q");
+    const p = cur[mode];
+    if (!el || !p || !p.done) return;
+    const was = el.classList.contains("open");
+    qsa(`#${k}Qs .q.open`).forEach(x => x.classList.remove("open"));
+    if (!was) el.classList.add("open");
+    p.sel = was ? null : el.dataset.id;
+    if (mode !== "d") drawG();
+  }));
+  $("prog").addEventListener("click", e => {
+    if (e.target.id !== "bReset") return;
+    if (!armed) {
+      armed = true;
+      renderProgress();
+      setTimeout(() => { if (armed) { armed = false; renderProgress(); } }, 3000);
+      return;
+    }
+    armed = false;
+    stats = {};
+    saveStats();
+    renderProgress();
+  });
+
+  const setHover = e => {
+    const p = mode === "e" ? cur.e : mode === "g" ? cur.g : mode === "f" ? cur.f : null;
+    if (!p || !p.done) return;
+    const r = VG.cv.getBoundingClientRect();
+    hover = [e.clientX - r.left, e.clientY - r.top];
+    drawG();
+  };
+  VG.cv.addEventListener("pointermove", setHover);
+  VG.cv.addEventListener("pointerdown", setHover);
+  VG.cv.addEventListener("pointerleave", e => {
+    if (e.pointerType === "mouse" && hover) { hover = null; drawG(); }
+  });
+
+  new ResizeObserver(resizeG).observe(VG.cv);
+  new ResizeObserver(resizeD).observe(VD.cv);
+  const redraw = () => { drawG(); drawD(); };
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", redraw);
+  new MutationObserver(redraw).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(redraw);
+
+  setMode("e");
+})();
+</script>
+</body>
+</html>
